@@ -1,42 +1,37 @@
-// CustomerDTO.java
 package com.app.dto;
 
-import com.app.entities.Course;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonProperty.Access;
+import java.time.LocalDate;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
-
 @Getter
 @Setter
 public class StudentDTO {
-  
-   
+
     private Long studentId;
-    
-	@NotBlank
+
+    @NotBlank(message = "Name cannot be blank")
     private String name;
 
-    @NotBlank
+    @NotBlank(message = "Email cannot be blank")
     private String email;
 
-    @NotBlank
+    @NotBlank(message = "Password cannot be blank")
     private String password;
 
-    @NotBlank
+    @NotBlank(message = "Mobile number cannot be blank")
     private String mobileNo;
 
-    @NotNull
-    private int balance;
+    @NotNull(message = "Balance is required")
+    private Integer balance;   // ✅ Wrapper instead of int
 
-    @NotNull
+    @NotNull(message = "Date of birth is required")
     private LocalDate dob;
 
-    @NotNull
-    private Course courseName;
+    @NotNull(message = "Course is required")
+    private String courseName;     // ✅ DTO should carry ID, not entity
 }

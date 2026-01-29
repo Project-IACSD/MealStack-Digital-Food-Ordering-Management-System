@@ -1,6 +1,6 @@
 package com.app.entities;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 
 import lombok.*;

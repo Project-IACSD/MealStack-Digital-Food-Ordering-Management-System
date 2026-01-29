@@ -8,7 +8,7 @@ import Header from "../common/Header";
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import EditIcon from "@mui/icons-material/Edit";
 import { useNavigate } from "react-router-dom";
-import StudentService from "../../../services/StudentService";
+import StudentService from "../../../services/studentService";
 import ItemMasterService from "../../../services/ItemMasterService";
 
 export default function ItemMasterTable(props) {
@@ -20,11 +20,14 @@ export default function ItemMasterTable(props) {
       console.log("in fetchItems data function")
       const response = await ItemMasterService.getAllItems();
       console.log(response.data)
-      setitemsData(response.data); // Update state with fetched data
-      console.log(itemsData);
+      // Handle both array response and object with data property
+      const data = Array.isArray(response) ? response : (response?.data || response || []);
+      setitemsData(data); // Update state with fetched data
+      console.log('Items data:', data);
       
     } catch (error) {
       console.error('Error fetching items data:', error);
+      setitemsData([]); // Set empty array on error
     }
   };
   // Fetch items data on component mount
@@ -122,9 +125,8 @@ export default function ItemMasterTable(props) {
           columns={colStructure}
           onRowClick={displayItem}
           checkboxSelection
-          disableRowSelectionOnClick {...mockData}
+          disableRowSelectionOnClick
           initialState={{
-            ...mockData.initialState,
             pagination: { paginationModel: { pageSize: 5 } },
           }} 
           pageSizeOptions={[5, 10, 25]}

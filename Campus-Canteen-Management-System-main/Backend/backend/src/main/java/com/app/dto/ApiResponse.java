@@ -1,22 +1,28 @@
 package com.app.dto;
 
-import java.time.LocalDateTime;
-
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-//DTO :  resp DTO : to send API resp from rest server ---> rest clnt
-@NoArgsConstructor
 @Getter
 @Setter
 public class ApiResponse {
-	private LocalDateTime timeStamp;
-	private String message;
-	public ApiResponse(String message) {
-		super();
-		this.message = message;
-		this.timeStamp=LocalDateTime.now();
-	}
-	
+
+    private String status;
+    private String message;
+
+    // ✅ No-arg constructor (important for Jackson)
+    public ApiResponse() {
+    }
+
+    // ✅ Single-arg constructor
+    public ApiResponse(String message) {
+        this.status = "SUCCESS";
+        this.message = message;
+    }
+
+    // ✅ TWO-ARG constructor (THIS FIXES YOUR ERROR)
+    public ApiResponse(String status, String message) {
+        this.status = status;
+        this.message = message;
+    }
 }

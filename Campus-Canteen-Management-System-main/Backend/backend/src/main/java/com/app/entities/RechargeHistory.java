@@ -2,15 +2,15 @@ package com.app.entities;
 
 import java.time.LocalDateTime;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "recharge_history")
@@ -23,6 +23,9 @@ public class RechargeHistory {
 
     @Column(name = "amount_added")
     private Integer amountAdded;
+
+    @Column(name = "payment_id")
+    private String paymentId;
 
     @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp;
@@ -57,6 +60,14 @@ public class RechargeHistory {
 
     public void setAmountAdded(Integer amountAdded) {
         this.amountAdded = amountAdded;
+    }
+
+    public String getPaymentId() {
+        return paymentId;
+    }
+
+    public void setPaymentId(String paymentId) {
+        this.paymentId = paymentId;
     }
 
     public void setTimestamp(LocalDateTime timestamp) {

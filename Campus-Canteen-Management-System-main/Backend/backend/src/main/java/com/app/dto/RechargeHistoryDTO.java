@@ -2,8 +2,7 @@ package com.app.dto;
 
 import java.time.LocalDateTime;
 
-import javax.persistence.PostLoad;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -19,16 +18,20 @@ import lombok.ToString;
 @ToString
 public class RechargeHistoryDTO {
 
-	@JsonProperty(access = Access.READ_ONLY)
+    @JsonProperty(access = Access.READ_ONLY)
     private Long transactionId;
+
+    private String paymentId;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime timeStamp;
 
+    @NotNull
     private Integer amountAdded;
 
     @NotNull
     private Long studentId;
-	
 
+    // Lombok generates getters/setters
+    // private String paymentId; // Added above
 }

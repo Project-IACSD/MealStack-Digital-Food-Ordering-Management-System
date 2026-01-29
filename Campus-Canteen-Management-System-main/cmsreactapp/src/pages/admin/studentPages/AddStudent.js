@@ -1,6 +1,6 @@
 import React from 'react'
 import StudentForm from '../../../components/admin/StudentForm'
-import StudentService from '../../../services/StudentService'
+import StudentService from '../../../services/studentService';
 export default function AddStudent() {
 
   const addStudent = (student) => {

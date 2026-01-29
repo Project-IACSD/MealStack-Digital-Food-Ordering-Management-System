@@ -1,11 +1,11 @@
 import React from 'react'
 import { Box } from "@mui/material";
 import StudentDetails from '../../../components/admin/StudentDetails';
-// import StudentService from '../../../services/StudentService';
+// import StudentService from '../../../services/studentService';
 import { useEffect,useState } from 'react';
 import StudentForm from '../../../components/admin/StudentForm'
 import { useParams } from 'react-router-dom';
-import StudentService from '../../../services/StudentService';
+import StudentService from '../../../services/studentService';
 import { useNavigate } from 'react-router-dom';
 export default function DeleteStudent() {
     const navigate = useNavigate();

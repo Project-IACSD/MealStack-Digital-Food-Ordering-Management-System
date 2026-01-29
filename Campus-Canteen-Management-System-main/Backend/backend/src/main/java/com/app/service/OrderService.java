@@ -10,17 +10,17 @@ import com.app.entities.OrderStatus;
 
 public interface OrderService {
     List<OrderDTO> getOrdersByStatus(OrderStatus orderStatus);
-    
+
     OrderDTO createOrder(OrderDTO dto);
-    
+
     OrderDTO getOrderById(Long orderId);
-    
+
     List<OrderDTO> getAllOrdersByStudentId(Long StudentId);
-    
+
     Long getCountOfOrdersByStatus(OrderStatus orderStatus);
-    
+
     CreateOrderDTO placeOrder(Long studentId, PlaceOrderRequest request);
-    
-    
-    
+
+    OrderDTO updateOrderStatus(Long orderId, OrderStatus status);
+
 }

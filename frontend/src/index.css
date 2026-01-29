@@ -1,0 +1,127 @@
+/*body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+*/
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap');
+
+html,
+body,
+#root,
+.app,
+.content {
+  height: 100%;
+  width: 100%;
+  font-family: 'Source Sans 3', sans-serif
+}
+
+.app {
+  display: flex;
+  position: relative;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/*Track*/
+::-webkit-scrollbar-track {
+  background: #e0e0e0;
+}
+
+/*Scrollbar handles*/
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+/*Hovering over scrollbar*/
+::-webkit-scrollbar-track:hover {
+  background: #555;
+}
+
+/* Enterprise Dark Theme Variables */
+:root {
+  --admin-bg-primary: #0f172a;
+  /* Deep Slate - Main Background */
+  --admin-bg-secondary: #1e293b;
+  /* Lighter Slate - Cards/Sidebar */
+  --admin-text-primary: #ffffff;
+  /* Pure White - Main Text */
+  --admin-text-secondary: #cbd5e1;
+  /* Lighter Slate - Subtext (Better Contrast) */
+  --admin-accent: #3b82f6;
+  /* Bright Blue - Primary Actions */
+  --admin-border: #334155;
+  /* Subtle Border */
+  --admin-success: #10b981;
+  /* Emerald Green - Success */
+  --admin-warning: #f59e0b;
+  /* Amber - Warning */
+  --admin-danger: #ef4444;
+  /* Red - Danger */
+}
+
+/* Utility Classes for React-Bootstrap Components */
+.bg-admin-dark {
+  background-color: var(--admin-bg-primary) !important;
+}
+
+.bg-admin-card {
+  background-color: var(--admin-bg-secondary) !important;
+}
+
+.text-admin-primary {
+  color: var(--admin-text-primary) !important;
+}
+
+.text-admin-secondary {
+  color: var(--admin-text-secondary) !important;
+}
+
+.border-admin {
+  border-color: var(--admin-border) !important;
+}
+
+.admin-table-header {
+  background-color: #020617 !important;
+  /* Even darker for contrast */
+  color: var(--admin-text-secondary) !important;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.admin-table-row:hover {
+  background-color: #334155 !important;
+  /* Highlight on hover */
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.badge-success-custom {
+  background-color: rgba(16, 185, 129, 0.2) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-warning-custom {
+  background-color: rgba(245, 158, 11, 0.2) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge-danger-custom {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+  color: #fca5a5 !important;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}

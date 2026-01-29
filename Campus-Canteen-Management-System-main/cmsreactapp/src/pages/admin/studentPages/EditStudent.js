@@ -2,7 +2,7 @@ import React  from 'react'
 import { useEffect,useState } from 'react';
 import StudentForm from '../../../components/admin/StudentForm'
 import { useParams,useNavigate } from 'react-router-dom';
-import StudentService from '../../../services/StudentService';
+import StudentService from '../../../services/studentService';
 export default function EditStudent() {
   const navigate = useNavigate();
   let { id } = useParams();

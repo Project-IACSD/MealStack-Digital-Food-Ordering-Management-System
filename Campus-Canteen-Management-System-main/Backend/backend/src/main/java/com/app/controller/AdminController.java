@@ -1,11 +1,11 @@
-// AdminController.java
 package com.app.controller;
 
 import com.app.dto.GetAllStudentDTO;
-import com.app.dto.StudentDTO;
-import com.app.entities.Student;
+import com.app.dto.RegisterStudentDTO;
 import com.app.service.StudentService;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -17,42 +17,43 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-import javax.validation.Valid;
-
-
 @RestController
 @RequestMapping("/admin")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:5173")
 public class AdminController {
 
     private final StudentService studentService;
 
-    @Autowired
     public AdminController(StudentService studentService) {
         this.studentService = studentService;
     }
-    @PostMapping("/register/student")
-    public ResponseEntity<String> registerStudent(@Valid @RequestBody StudentDTO studentDTO) {
-        studentService.registerStudent(studentDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Student registered successfully");
-    }
-    
 
+    // ✅ Simple admin check
+    @GetMapping("/dashboard")
+    public String adminOnly() {
+        return "Admin access";
+    }
+
+    // ✅ Admin can view all students
     @GetMapping("/students")
     public ResponseEntity<List<GetAllStudentDTO>> getAllStudents() {
+        return ResponseEntity.ok(studentService.getAllStudents());
+    }
+
+    // ✅ Admin can register a student
+    @PostMapping("/register/student")
+    public ResponseEntity<String> registerStudent(@RequestBody @Valid RegisterStudentDTO dto) {
         try {
-            List<GetAllStudentDTO> students = studentService.getAllStudents();
-            return ResponseEntity.ok(students);
+            String result = studentService.registerStudent(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(result);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
         }
     }
-    
+
+    // ✅ Admin stats
     @GetMapping("/totalstudents")
     public ResponseEntity<Long> getTotalRegisteredStudents() {
-        Long totalStudents = studentService.getTotalRegisteredStudents();
-        return ResponseEntity.ok(totalStudents);
+        return ResponseEntity.ok(studentService.getTotalRegisteredStudents());
     }
-    
-    
 }

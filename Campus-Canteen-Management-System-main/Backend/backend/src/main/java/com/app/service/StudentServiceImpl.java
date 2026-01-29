@@ -1,246 +1,214 @@
-// CustomerServiceImpl.java
 package com.app.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.transaction.Transactional;
-
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.app.dto.ApiResponse;
-import com.app.dto.GetAllStudentDTO;
-import com.app.dto.ItemMasterDTO;
-import com.app.dto.SignInDTO;
-import com.app.dto.StudentDTO;
-import com.app.dto.UpdatePasswordDTO;
-import com.app.entities.ItemMaster;
+import com.app.dto.*;
+import com.app.entities.Course;
+import com.app.entities.Role;
 import com.app.entities.Student;
+import com.app.entities.User;
 import com.app.exceptions.ResourceNotFoundException;
 import com.app.repository.ItemDailyRepository;
 import com.app.repository.OrderRepository;
 import com.app.repository.StudentRepository;
+import com.app.security.JwtUtils;
 
 @Service
 @Transactional
 public class StudentServiceImpl implements StudentService {
 
-	private final StudentRepository studentRepository;
-	private final ItemDailyRepository itemDailyRepository;
+    private final StudentRepository studentRepository;
+    private final ItemDailyRepository itemDailyRepository;
     private final OrderRepository orderRepository;
-   
-	
-	@Autowired
-	private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtils jwtUtils;
 
-	@Autowired
-	
-	public StudentServiceImpl(StudentRepository studentRepository,ItemDailyRepository itemDailyRepository, OrderRepository orderRepository) {
-        this.studentRepository=studentRepository;
-		this.itemDailyRepository = itemDailyRepository;
+    public StudentServiceImpl(
+            StudentRepository studentRepository,
+            ItemDailyRepository itemDailyRepository,
+            OrderRepository orderRepository,
+            ModelMapper modelMapper,
+            PasswordEncoder passwordEncoder,
+            JwtUtils jwtUtils) {
+
+        this.studentRepository = studentRepository;
+        this.itemDailyRepository = itemDailyRepository;
         this.orderRepository = orderRepository;
+        this.modelMapper = modelMapper;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtils = jwtUtils;
     }
 
-	@Override
-	public void registerStudent(StudentDTO studentDTO) {
-		if (studentExists(studentDTO.getStudentId())) {
-			throw new RuntimeException("Student with this ID already exists.");
-		}
-		Student student = new Student();
-		// Map DTO fields to entity
-		student.setName(studentDTO.getName());
-		student.setEmail(studentDTO.getEmail());
-		student.setPassword(studentDTO.getPassword());
-		student.setMobileNo(studentDTO.getMobileNo());
-		student.setBalance(studentDTO.getBalance());
-		student.setDob(studentDTO.getDob());
-		student.setCourseName(studentDTO.getCourseName());
-		studentRepository.save(student);
-	}
+    // ================= REGISTER =================
+    @Override
+    public String registerStudent(RegisterStudentDTO dto) {
 
-	public boolean studentExists(Long studentId) {
-		Optional<Student> existingStudent = studentRepository.findById(studentId);
-		return existingStudent.isPresent();
-	}
-	
-	@Override
+        if (studentRepository.findByEmail(dto.getEmail()).isPresent()) {
+            throw new RuntimeException("Student already exists");
+        }
+
+        // ===== STUDENT =====
+        Student student = new Student();
+        student.setName(dto.getName());
+        student.setEmail(dto.getEmail());
+        student.setMobileNo(dto.getMobileNo());
+        student.setPassword(passwordEncoder.encode(dto.getPassword()));
+        student.setBalance(0);
+        student.setDob(dto.getDob());
+        student.setCourseName(dto.getCourseName());
+
+        // ===== USER (SECURITY) =====
+        User user = new User();
+        user.setEmail(dto.getEmail());
+        user.setPassword(student.getPassword()); // already encoded
+        user.setRole(Role.STUDENT);
+
+        // ===== LINK =====
+        student.setUser(user);
+
+        // ===== SAVE =====
+        studentRepository.save(student); // cascade saves User
+
+        return "Student registered successfully";
+    }
+
+    // ================= LOGIN =================
+    @Override
+    public String login(SignInDTO dto) {
+
+        Student student = studentRepository
+                .findByEmail(dto.getUserName())
+                .orElseThrow(() -> new RuntimeException("Invalid email"));
+
+        if (!passwordEncoder.matches(dto.getPassword(), student.getPassword())) {
+            throw new RuntimeException("Invalid password");
+        }
+
+        return jwtUtils.generateToken(
+                student.getUser().getEmail(),
+                student.getUser().getRole().name());
+    }
+
+    // ================= PASSWORD =================
+    @Override
+    public String changePassword(Long id, UpdatePasswordDTO dto) {
+
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+
+        if (!passwordEncoder.matches(dto.getOldPassword(), student.getPassword())) {
+            return "Invalid old password";
+        }
+
+        student.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        student.getUser().setPassword(student.getPassword());
+
+        return "Password updated successfully";
+    }
+
+    // ================= LOGOUT =================
+    @Override
+    public ApiResponse logout() {
+        return new ApiResponse("Student logged out successfully");
+    }
+
+    // ================= BALANCE =================
+    @Override
+    public int getBalanceById(Long studentId) {
+        return getStudent(studentId).getBalance();
+    }
+
+    @Override
+    public ApiResponse setBalanceById(Long studentId, Integer newBalance) {
+        Student student = getStudent(studentId);
+        student.setBalance(newBalance);
+        return new ApiResponse("Balance updated successfully");
+    }
+
+    // ================= GETTERS =================
+    @Override
+    public String getEmailByStudentID(Long id) {
+        return getStudent(id).getEmail();
+    }
+
+    @Override
+    public String getNameByStudentID(Long id) {
+        return getStudent(id).getName();
+    }
+
+    @Override
+    public LocalDate getDobByStudentID(Long id) {
+        return getStudent(id).getDob();
+    }
+
+    @Override
+    public String getMobileNoByStudentID(Long id) {
+        return getStudent(id).getMobileNo();
+    }
+
+    private Student getStudent(Long id) {
+        return studentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+    }
+
+    // ================= CRUD =================
+    @Override
+    public StudentDTO getStudentByEmail(String email) {
+        return modelMapper.map(
+                studentRepository.findByEmail(email)
+                        .orElseThrow(() -> new ResourceNotFoundException("Student not found")),
+                StudentDTO.class);
+    }
+
+    @Override
+    public StudentDTO getStudentDetails(Long studentId) {
+        return modelMapper.map(getStudent(studentId), StudentDTO.class);
+    }
+
+    @Override
+    public StudentDTO updateStudent(Long studentId, StudentDTO dto) {
+        Student student = getStudent(studentId);
+
+        student.setName(dto.getName());
+        student.setEmail(dto.getEmail());
+        student.setMobileNo(dto.getMobileNo());
+        student.setBalance(dto.getBalance());
+        student.setDob(dto.getDob());
+        student.setCourseName(
+                Course.valueOf(dto.getCourseName().toUpperCase()));
+
+        return modelMapper.map(student, StudentDTO.class);
+    }
+
+    @Override
+    public ApiResponse deleteStudentDetails(Long studentId) {
+        studentRepository.delete(getStudent(studentId));
+        return new ApiResponse("Student deleted successfully");
+    }
+
+    @Override
     public List<GetAllStudentDTO> getAllStudents() {
-        List<Student> students = studentRepository.findAll();
-        return students.stream()
-                .map(student -> modelMapper.map(student, GetAllStudentDTO.class))
+        return studentRepository.findAll()
+                .stream()
+                .map(s -> modelMapper.map(s, GetAllStudentDTO.class))
                 .collect(Collectors.toList());
     }
-	
-	
-	@Override
-	public int getBalanceById(Long studentId) {
-        Optional<Student> studentOptional = studentRepository.findById(studentId);
 
-        if (studentOptional.isPresent()) {
-            Student student = studentOptional.get();
-            return student.getBalance();
-        } else {
-            // Handle not found scenario, throw exception or return default value
-            throw new ResourceNotFoundException("Student not found with ID: " + studentId);
-        }
-    }
-	
-	@Override
-	public ApiResponse setBalanceById(Long studentId, Integer newBalance) {
-        Optional<Student> studentOptional = studentRepository.findById(studentId);
-
-        if (studentOptional.isPresent()) {
-            Student student = studentOptional.get();
-            student.setBalance(newBalance);
-            studentRepository.save(student);
-            return new ApiResponse("Balance is updated for id " + student.getStudentId());
-        } else {
-            // Handle not found scenario, throw exception or return default value
-            throw new ResourceNotFoundException("Student not found with ID: " + studentId);
-        }
-    }
-
-	@Override
-	public String login(SignInDTO dto) {
-	    String userName = dto.getUserName();
-	    String password = dto.getPassword();
-
-	  
-	    Optional<Student> studentOptional = studentRepository.findByEmail(userName);
-
-	    if (studentOptional.isPresent()) {
-	        Student student = studentOptional.get();
-
-	   
-	        if (password.equals(student.getPassword())) {
-	            if (password.equals(student.getDob().toString())) {
-	                return "Login successful1";
-	            } else {
-	                return "Login successful1 successful2";
-	            }    
-	        } else {
-	        
-	            return "Invalid password";
-	        	}
-        }else {
-        	return "Invalid username";
-        }
-	 } 
-	
-	@Override
-	public String changePassword(Long id,UpdatePasswordDTO dto) {
-		String oldPassword = dto.getOldPassword();
-	    String newPassword = dto.getNewPassword();
-		
-		 Optional<Student> studentOptional = studentRepository.findById(id);
-		 
-		 if (studentOptional.isPresent()) {
-			 	Student student = studentOptional.get();
-			 	if (oldPassword.equals(student.getPassword())) {
-		            student.setPassword(newPassword);
-		            studentRepository.save(student);
-		            return "ok";
-			 	}else {
-			 		return "Invalid old password";
-			 	}
-	    } else {
-	        return "Invalid student id";
-	    }
-	}
-
-	@Override
-	public StudentDTO getStudentByEmail(String email) {
-		Optional<Student> studentOptional = studentRepository.findByEmail(email);
-
-	    if (studentOptional.isPresent()) {
-	        Student student = studentOptional.get();
-	        StudentDTO studDto = modelMapper.map(student,StudentDTO.class);
-	        return studDto;
-	    }
-	        
-	        
-		return null;
-	}
-	
-	
-	@Override
-	public ApiResponse logout() {
-		
-		return new ApiResponse("Student logged out successfully");
-        
-    }
-
-	@Override
-	public String getEmailByStudentID(Long studId) {
-		Student student = studentRepository.findById(studId)
-	            .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + studId));
-
-	    return student.getEmail();
-	}
-
-	@Override
-	public String getNameByStudentID(Long studId) {
-		Student student = studentRepository.findById(studId)
-	            .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + studId));
-
-	    return student.getName();
-	}
-
-	@Override
-	public LocalDate getDobByStudentID(Long studId) {
-		Student student = studentRepository.findById(studId)
-	            .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + studId));
-
-	    return student.getDob();
-	}
-		
-
-	@Override
-	public String getMobileNoByStudentID(Long studId) {
-		Student student = studentRepository.findById(studId)
-	            .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + studId));
-
-	    return student.getMobileNo();
-	}
-
-	@Override
-	public Long getTotalRegisteredStudents() {
+    @Override
+    public Long getTotalRegisteredStudents() {
         return studentRepository.count();
     }
 
-	@Override
-	public StudentDTO getStudentDetails(Long studentId) {
-		
-		return modelMapper.map(
-				studentRepository.findById(studentId).orElseThrow(() -> new ResourceNotFoundException("Invalid Student Id !!!!")),
-				StudentDTO.class);
-	}
-
-	@Override
-	public ApiResponse deleteStudentDetails(Long studentId) {
-		Student student = studentRepository.findById(studentId).orElseThrow(()-> new ResourceNotFoundException("Student not found"));
-		studentRepository.delete(student);
-		return new ApiResponse("Student Details of student with ID " + student.getStudentId() + " deleted....");
-	}
-
-	@Override
-	public StudentDTO updateStudent(Long studentId, StudentDTO dto) {
-		Student student = studentRepository.findById(studentId).orElseThrow(()-> new ResourceNotFoundException("Student not found"));
-		student.setName(dto.getName());
-		student.setEmail(dto.getEmail());
-		student.setMobileNo(dto.getMobileNo());
-		student.setBalance(dto.getBalance());
-		student.setDob(dto.getDob());
-		student.setCourseName(dto.getCourseName());
-		return modelMapper.map(student, StudentDTO.class);
-	}
-	
-	
+    @Override
+    public boolean studentExists(Long studentId) {
+        return studentRepository.existsById(studentId);
+    }
 }
-
-	
-

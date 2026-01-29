@@ -8,7 +8,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { useNavigate } from "react-router-dom";
-import StudentService from '../../../services/StudentService'
+import StudentService from '../../../services/studentService';
 
 export default function StudentTable() {
     const theme = useTheme();
@@ -41,8 +41,10 @@ export default function StudentTable() {
   const fetchStudentsData = async () => {
     try {
       const response = await StudentService.getAllStudents();
-      setStudentsData(response.data); // Update state with fetched data
-      console.log(studentsData);
+      // Handle both array response and object with data property
+      const data = Array.isArray(response) ? response : (response?.data || response || []);
+      setStudentsData(data);
+      console.log('Students data:', data);
       
     } catch (error) {
       console.error('Error fetching students data:', error);
@@ -165,9 +167,8 @@ export default function StudentTable() {
             rows={studentsData}
             columns={colStructure}
             onRowClick={displayCustomer}
-            disableRowSelectionOnClick {...studentsData}
+            disableRowSelectionOnClick
           initialState={{
-            ...studentsData.initialState,
             pagination: { paginationModel: { pageSize: 8 } },
           }} 
           pageSizeOptions={[5, 10, 25]}

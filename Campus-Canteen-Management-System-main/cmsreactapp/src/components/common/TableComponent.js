@@ -3,8 +3,8 @@ import { useTable, useSortBy, useFilters, usePagination } from 'react-table'
 import { SortUp, SortDown } from 'react-bootstrap-icons'
 
 export default function TableComponent(props) {
-    const columns = useMemo(()=>props.colStructure,[]) // New Data is notreceived on every render. So we need to memoize the columns so they don't change on each re-render
-    const data = useMemo(()=>props.data,[])
+    const columns = useMemo(()=>props.colStructure || [], [props.colStructure]) // New Data is notreceived on every render. So we need to memoize the columns so they don't change on each re-render
+    const data = useMemo(()=>props.data || [], [props.data])
 
     //To apply a property to all columns:
     const defaultColumn = useMemo(()=>{
@@ -42,7 +42,7 @@ export default function TableComponent(props) {
         <table {...getTableProps()} className='table'>
             <thead className='table-primary'>
                 {
-                    headerGroups.map((headerGroup)=>( 
+                    (headerGroups || []).map((headerGroup)=>( 
                 <tr {...headerGroup.getHeaderGroupProps()}>
                     {headerGroup.headers.map((column=>( 
                         <th {...column.getHeaderProps(column.getSortByToggleProps())} style={{verticalAlign: "top"}}>
@@ -58,7 +58,7 @@ export default function TableComponent(props) {
             </thead>
             <tbody {...getTableBodyProps()}>
                 {
-                    page.map(row=>{
+                    (page || []).map(row=>{
                         prepareRow(row)
                         return(
                             <tr {...row.getRowProps()}>
@@ -77,7 +77,7 @@ export default function TableComponent(props) {
         <span>
             Page{' '}
             <strong>
-                {pageIndex + 1} of {pageOptions.length} 
+                {pageIndex + 1} of {pageOptions?.length || 0} 
             </strong>
         </span>
         <button onClick={()=>gotoPage(0)} disabled={(!canPreviousPage)} className='btn btn-outline-primary'>{' << '}</button>&nbsp;&nbsp;

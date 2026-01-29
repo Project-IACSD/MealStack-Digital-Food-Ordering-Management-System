@@ -4,8 +4,6 @@ package com.app.controller;
 import java.time.LocalDate;
 import java.util.Map;
 
-import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,15 +18,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.app.dto.AuthResponse;
 import com.app.dto.ItemMasterDTO;
+import com.app.dto.RegisterStudentDTO;
 import com.app.dto.SignInDTO;
 import com.app.dto.StudentDTO;
 import com.app.dto.UpdatePasswordDTO;
 import com.app.service.StudentService;
 
-@RequestMapping(path="/student")
+import jakarta.validation.Valid;
+
+@RequestMapping(path = "/student")
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:5173")
 public class StudentController {
 
     private final StudentService studentService;
@@ -37,34 +39,46 @@ public class StudentController {
     public StudentController(StudentService studentService) {
         this.studentService = studentService;
     }
-    
+
+    @GetMapping("/profile")
+    public String studentOnly() {
+        return "Student access";
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<String> registerStudent(
+            @RequestBody RegisterStudentDTO dto) {
+
+        String result = studentService.registerStudent(dto);
+        return ResponseEntity.ok(result);
+    }
+
     @GetMapping("/{studentId}/balance")
     public ResponseEntity<Integer> getBalanceById(@PathVariable Long studentId) {
         int balance = studentService.getBalanceById(studentId);
         return ResponseEntity.ok().body(balance);
     }
-    
+
     @PutMapping("/{studentId}/balance")
-    public ResponseEntity<?> setBalanceById(@PathVariable Long studentId, @RequestBody Map<String, Integer> requestBody) {
+    public ResponseEntity<?> setBalanceById(@PathVariable Long studentId,
+            @RequestBody Map<String, Integer> requestBody) {
         Integer newBalance = requestBody.get("value");
         System.out.println("in set balance " + newBalance);
         return ResponseEntity.ok().body(studentService.setBalanceById(studentId, newBalance));
     }
-    
-    
+
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody SignInDTO dto) {
-        String mesg = studentService.login(dto);
-            return ResponseEntity.ok().body(mesg);
-     }
-    
+    public ResponseEntity<AuthResponse> login(@RequestBody SignInDTO dto) {
+        String token = studentService.login(dto);
+        return ResponseEntity.ok(new AuthResponse(token));
+    }
+
     @PutMapping("/changepassword/{studId}")
-    public ResponseEntity<String> changePassword(@PathVariable Long studId,@RequestBody UpdatePasswordDTO dto) {
-        String result = studentService.changePassword(studId,dto);
+    public ResponseEntity<String> changePassword(@PathVariable Long studId, @RequestBody UpdatePasswordDTO dto) {
+        String result = studentService.changePassword(studId, dto);
         return ResponseEntity.ok().body(result);
     }
-    
-    
+
     @PostMapping("/logout")
     public ResponseEntity<String> logout() {
         studentService.logout();
@@ -81,7 +95,7 @@ public class StudentController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found");
         }
     }
-    
+
     @GetMapping("/{studentId}/email")
     public ResponseEntity<String> getStudentEmailById(@PathVariable Long studentId) {
         String studentEmail = studentService.getEmailByStudentID(studentId);
@@ -92,7 +106,7 @@ public class StudentController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found");
         }
     }
-    
+
     @GetMapping("/{studentId}/mobile")
     public ResponseEntity<String> getStudentMobileById(@PathVariable Long studentId) {
         String mobileNo = studentService.getMobileNoByStudentID(studentId);
@@ -103,10 +117,10 @@ public class StudentController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found");
         }
     }
-    
+
     @GetMapping("/{studentId}/dob")
     public ResponseEntity<?> getStudentDobById(@PathVariable Long studentId) {
-       LocalDate dob = studentService.getDobByStudentID(studentId);
+        LocalDate dob = studentService.getDobByStudentID(studentId);
 
         if (dob != null) {
             return ResponseEntity.ok(dob);
@@ -114,7 +128,7 @@ public class StudentController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found");
         }
     }
-    
+
     @GetMapping("/email/{email}")
     public ResponseEntity<?> getStudentByEmail(@PathVariable String email) {
         StudentDTO studentDTO = studentService.getStudentByEmail(email);
@@ -125,28 +139,26 @@ public class StudentController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found for email: " + email);
         }
     }
-    
+
     @GetMapping("/{studentId}")
-	public ResponseEntity<?> getStudentDetails(@PathVariable Long studentId) {
-		System.out.println("in get student " + studentId);
-		return ResponseEntity
-				.ok(studentService.getStudentDetails(studentId));
+    public ResponseEntity<?> getStudentDetails(@PathVariable Long studentId) {
+        System.out.println("in get student " + studentId);
+        return ResponseEntity
+                .ok(studentService.getStudentDetails(studentId));
 
-	}
-    
+    }
 
-	@PutMapping("/{studentId}")
-	public ResponseEntity<?> updateStudent(@PathVariable Long studentId,
-			@RequestBody @Valid StudentDTO dto) {
-		System.out.println("in update student " +studentId+" "+ dto);		
-		return ResponseEntity.
-				ok(studentService.updateStudent(studentId, dto));
-	}
-	
-	@DeleteMapping("/{studentId}")
-	public ResponseEntity<?> deleteStudent(@PathVariable Long studentId) {
-		System.out.println("in delete student " + studentId);
-		return ResponseEntity.ok(studentService.deleteStudentDetails(studentId));
-	}
+    @PutMapping("/{studentId}")
+    public ResponseEntity<?> updateStudent(@PathVariable Long studentId,
+            @RequestBody @Valid StudentDTO dto) {
+        System.out.println("in update student " + studentId + " " + dto);
+        return ResponseEntity.ok(studentService.updateStudent(studentId, dto));
+    }
+
+    @DeleteMapping("/{studentId}")
+    public ResponseEntity<?> deleteStudent(@PathVariable Long studentId) {
+        System.out.println("in delete student " + studentId);
+        return ResponseEntity.ok(studentService.deleteStudentDetails(studentId));
+    }
 
 }

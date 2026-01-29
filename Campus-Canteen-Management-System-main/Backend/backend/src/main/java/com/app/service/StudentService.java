@@ -7,6 +7,7 @@ import java.util.List;
 import com.app.dto.ApiResponse;
 import com.app.dto.GetAllStudentDTO;
 import com.app.dto.ItemMasterDTO;
+import com.app.dto.RegisterStudentDTO;
 import com.app.dto.SignInDTO;
 import com.app.dto.StudentDTO;
 import com.app.dto.UpdatePasswordDTO;
@@ -15,7 +16,7 @@ import com.app.entities.Student;
 public interface StudentService {
 	boolean studentExists(Long studentId);
 	
-    void registerStudent(StudentDTO studentDTO);
+
     
     List<GetAllStudentDTO> getAllStudents();
     
@@ -48,7 +49,11 @@ public interface StudentService {
 
 	 StudentDTO updateStudent(Long studentId, StudentDTO dto);
 
-	
+	String registerStudent(RegisterStudentDTO dto);
+
+
+
+
 	
 	
 	

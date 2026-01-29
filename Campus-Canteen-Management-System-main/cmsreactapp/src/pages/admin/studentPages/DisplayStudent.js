@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect,useState } from 'react';
 import StudentForm from '../../../components/admin/StudentForm'
 import { useParams } from 'react-router-dom';
-import StudentService from '../../../services/StudentService';
+import StudentService from '../../../services/studentService';
 export default function DisplayStudent() {
   let { id } = useParams();
   const [userData, setUserData] = useState(null); 

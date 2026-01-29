@@ -1,6 +1,8 @@
 package com.app.service;
 
 import java.util.List;
+import java.time.LocalDate;
+
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -29,60 +31,107 @@ public class ItemDailyServiceImpl implements ItemDailyService {
     @Autowired
     private ModelMapper mapper;
 
+    // ================= GET ALL =================
     @Override
     public List<ItemDailyDTO> getAllDailyItems() {
-        List<ItemDaily> itemList = itemRepo.findAll();
-        return itemList.stream()
-                .map(item -> mapper.map(item, ItemDailyDTO.class))
+        return itemRepo.findAll()
+                .stream()
+                .map(item -> {
+                    ItemDailyDTO dto = mapper.map(item, ItemDailyDTO.class);
+                    // Manually map fields that might be missed by strict ModelMapper compilation
+                    dto.setDailyId(item.getDailyId());
+                    dto.setItemId(item.getItem().getId()); // Crucial: Link to Master Item
+                    dto.setItemName(item.getItem().getItemName());
+                    dto.setItemMasterId(item.getItem().getId());
+
+                    // Added fields for Frontend Display
+                    dto.setItemPrice(item.getItem().getItemPrice());
+                    dto.setItemImgLink(item.getItem().getItemImgLink());
+                    dto.setItemCategory(item.getItem().getItemCategory().toString());
+
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public ApiResponse deleteItemDetails(Long itemId) {
-        ItemDaily item = itemRepo.findById(itemId)
-                .orElseThrow(() -> new ResourceNotFoundException("Item not found"));
-        itemRepo.delete(item);
-        return new ApiResponse(
-                "Item Details of item with ID " + item.getItemId() + " deleted...."
-        );
-    }
-
+    // ================= ADD =================
     @Override
     public ApiResponse addNewitem(Long itemMasId, ItemDailyDTO dto) {
-        ItemMaster itemMaster = itemMasRepo.findById(itemMasId)
-                .orElseThrow(() -> new ResourceNotFoundException("Invalid Item Master ID!!!"));
+        if (itemMasId == null) {
+            throw new ResourceNotFoundException("Item Master ID cannot be null");
+        }
 
-        ItemDaily itemEntity = mapper.map(dto, ItemDaily.class);
-        itemEntity.setItem(itemMaster);
-        itemRepo.save(itemEntity);
+        ItemMaster itemMaster = itemMasRepo.findById(itemMasId)
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid Item Master ID"));
+
+        // Check if already exists for today
+        java.util.Optional<ItemDaily> existingItem = itemRepo.findByItemAndDate(itemMaster, LocalDate.now());
+
+        if (existingItem.isPresent()) {
+            // Update existing item with new quantity
+            ItemDaily item = existingItem.get();
+            item.setInitialQty(dto.getInitialQty());
+            itemRepo.save(item);
+
+            return new ApiResponse("Updated existing daily item: " + itemMaster.getItemName());
+        }
+
+        // Create new daily item
+        ItemDaily item = new ItemDaily();
+        item.setItem(itemMaster); // ✅ FK handled here
+        item.setInitialQty(dto.getInitialQty());
+        item.setSoldQty(0); // ✅ REQUIRED
+
+        itemRepo.save(item);
 
         return new ApiResponse(
-                "Added item master to daily , " + itemMaster.getItemName()
-        );
+                "Added item to daily menu: " + itemMaster.getItemName());
     }
 
+    // ================= UPDATE =================
     @Override
-    public ItemDailyDTO updateItem(Long itemId, ItemDailyDTO dto) {
-        ItemDaily item = itemRepo.findById(itemId)
-                .orElseThrow(() -> new ResourceNotFoundException("Invalid Item Id !!!!"));
+    public ItemDailyDTO updateItem(Long dailyId, ItemDailyDTO dto) {
 
-        item.setInitialQty(dto.getInitialQty());
-        item.setSoldQty(dto.getSoldQty());
+        ItemDaily item = itemRepo.findById(dailyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid Daily Item ID"));
+
+        if (dto.getInitialQty() != null) {
+            item.setInitialQty(dto.getInitialQty());
+        }
+
+        if (dto.getSoldQty() != null) {
+            item.setSoldQty(dto.getSoldQty());
+        }
 
         return mapper.map(item, ItemDailyDTO.class);
     }
 
+    // ================= GET ONE =================
     @Override
-    public ItemDailyDTO getItemDetails(Long itemId) {
-        ItemDaily item = itemRepo.findById(itemId)
-                .orElseThrow(() -> new ResourceNotFoundException("Invalid Item Id !!!!"));
+    public ItemDailyDTO getItemDetails(Long dailyId) {
+        ItemDaily item = itemRepo.findById(dailyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid Daily Item ID"));
 
         return mapper.map(item, ItemDailyDTO.class);
     }
 
+    // ================= DELETE ONE =================
+    @Override
+    public ApiResponse deleteItemDetails(Long dailyId) {
+
+        ItemDaily item = itemRepo.findById(dailyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Item not found"));
+
+        itemRepo.delete(item);
+
+        return new ApiResponse(
+                "Daily item deleted with ID " + dailyId);
+    }
+
+    // ================= DELETE ALL =================
     @Override
     public ApiResponse deleteAllDailyItems() {
         itemRepo.deleteAll();
-        return new ApiResponse("All items are deleted");
+        return new ApiResponse("All daily items deleted");
     }
 }

@@ -2,13 +2,21 @@ package com.app.dto;
 
 public class ItemDailyDTO {
 
-    private Long itemId;
+    private Long dailyId; // New Surrogate PK
+    private Long itemId; // Stores ItemMaster ID
+    private Long itemMasterId; // Redundant but keeping for safety
     private Integer initialQty;
     private Integer soldQty;
-    private Long itemMasterId;
+
     private String itemName;
+    private Integer itemPrice;
+    private String itemImgLink;
+    private String itemCategory;
 
     // ===== GETTERS =====
+    public Long getDailyId() {
+        return dailyId;
+    }
 
     public Long getItemId() {
         return itemId;
@@ -30,7 +38,22 @@ public class ItemDailyDTO {
         return itemName;
     }
 
+    public Integer getItemPrice() {
+        return itemPrice;
+    }
+
+    public String getItemImgLink() {
+        return itemImgLink;
+    }
+
+    public String getItemCategory() {
+        return itemCategory;
+    }
+
     // ===== SETTERS =====
+    public void setDailyId(Long dailyId) {
+        this.dailyId = dailyId;
+    }
 
     public void setItemId(Long itemId) {
         this.itemId = itemId;
@@ -50,5 +73,17 @@ public class ItemDailyDTO {
 
     public void setItemName(String itemName) {
         this.itemName = itemName;
+    }
+
+    public void setItemPrice(Integer itemPrice) {
+        this.itemPrice = itemPrice;
+    }
+
+    public void setItemImgLink(String itemImgLink) {
+        this.itemImgLink = itemImgLink;
+    }
+
+    public void setItemCategory(String itemCategory) {
+        this.itemCategory = itemCategory;
     }
 }

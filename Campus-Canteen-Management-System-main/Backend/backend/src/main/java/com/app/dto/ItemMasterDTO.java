@@ -1,6 +1,6 @@
 package com.app.dto;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 import com.app.entities.ItemCategory;
 import com.app.entities.ItemGenre;

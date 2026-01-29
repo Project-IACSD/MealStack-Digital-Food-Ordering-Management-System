@@ -1,9 +1,11 @@
 package com.app.entities;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,5 +26,8 @@ public class Admin {
 	
 	@Column(length = 20, name = "Admin_password")
 	private String password;
+	@OneToOne
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
 
 }
