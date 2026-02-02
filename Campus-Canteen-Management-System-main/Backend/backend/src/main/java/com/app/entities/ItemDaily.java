@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "item_daily")
+@Table(name = "item_daily", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "item_date", "item_id" })
+})
 public class ItemDaily {
 
     @Id
@@ -30,21 +32,46 @@ public class ItemDaily {
     }
 
     // Getters and Setters
-    public Long getDailyId() { return dailyId; }
-    public void setDailyId(Long dailyId) { this.dailyId = dailyId; }
+    public Long getDailyId() {
+        return dailyId;
+    }
 
-    public LocalDate getDate() { return date; }
-    public void setDate(LocalDate date) { this.date = date; }
+    public void setDailyId(Long dailyId) {
+        this.dailyId = dailyId;
+    }
 
-    public Integer getInitialQty() { return initialQty; }
-    public void setInitialQty(Integer initialQty) { this.initialQty = initialQty; }
+    public LocalDate getDate() {
+        return date;
+    }
 
-    public Integer getSoldQty() { return soldQty; }
-    public void setSoldQty(Integer soldQty) { this.soldQty = soldQty; }
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
 
-    public ItemMaster getItem() { return item; }
-    public void setItem(ItemMaster item) { this.item = item; }
-    
+    public Integer getInitialQty() {
+        return initialQty;
+    }
+
+    public void setInitialQty(Integer initialQty) {
+        this.initialQty = initialQty;
+    }
+
+    public Integer getSoldQty() {
+        return soldQty;
+    }
+
+    public void setSoldQty(Integer soldQty) {
+        this.soldQty = soldQty;
+    }
+
+    public ItemMaster getItem() {
+        return item;
+    }
+
+    public void setItem(ItemMaster item) {
+        this.item = item;
+    }
+
     // Helper method to check availability
     public int getAvailableQty() {
         return this.initialQty - this.soldQty;

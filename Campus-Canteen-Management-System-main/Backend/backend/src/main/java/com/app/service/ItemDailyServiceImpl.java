@@ -68,24 +68,31 @@ public class ItemDailyServiceImpl implements ItemDailyService {
         java.util.Optional<ItemDaily> existingItem = itemRepo.findByItemAndDate(itemMaster, LocalDate.now());
 
         if (existingItem.isPresent()) {
-            // Update existing item with new quantity
+            // Already exists -> Update quantity instead of creating new
+            // OR simply return success if we don't want to override
             ItemDaily item = existingItem.get();
+            // Optional: Accumulate quantity logic if desired, or reset.
+            // Here we just update initialQty as per user flow.
             item.setInitialQty(dto.getInitialQty());
             itemRepo.save(item);
-
             return new ApiResponse("Updated existing daily item: " + itemMaster.getItemName());
         }
 
         // Create new daily item
         ItemDaily item = new ItemDaily();
-        item.setItem(itemMaster); // ✅ FK handled here
+        item.setItem(itemMaster);
         item.setInitialQty(dto.getInitialQty());
-        item.setSoldQty(0); // ✅ REQUIRED
+        item.setSoldQty(0);
+        item.setDate(LocalDate.now()); // Explicitly set Date
 
-        itemRepo.save(item);
+        try {
+            itemRepo.save(item);
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            // Race condition catch: if unique constraint is violated
+            return new ApiResponse("Item already exists in daily menu (Duplicate prevented).");
+        }
 
-        return new ApiResponse(
-                "Added item to daily menu: " + itemMaster.getItemName());
+        return new ApiResponse("Added item to daily menu: " + itemMaster.getItemName());
     }
 
     // ================= UPDATE =================

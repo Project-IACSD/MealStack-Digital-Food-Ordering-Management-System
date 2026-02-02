@@ -6,82 +6,51 @@ import MenuService from "../../../api/menuService";
 import { useAuth } from "../../../auth/AuthContext";
 
 export default function MenuSelector() {
-  const [itemsData, setItemsData] = useState([]);
-  const [dailyMenuItems, setDailyMenuItems] = useState([]);
+  const [itemsData, setItemsData] = useState([]); // Pure Inventory (Master)
+  const [dailyMenuItems, setDailyMenuItems] = useState([]); // Pure Daily (Transaction)
   const [loading, setLoading] = useState(false);
   const { role, token } = useAuth();
 
   // Snackbar state
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
-  const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false });
-  };
+  const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
+  const showSnackbar = (message, severity = "success") => setSnackbar({ open: true, message, severity });
 
-  const showSnackbar = (message, severity = "success") => {
-    setSnackbar({ open: true, message, severity });
-  };
-
-  // Fetch Items from backend
+  // --- Fetch Data Strictly Separated ---
   const fetchItemsData = async () => {
     try {
       const [inventoryRes, dailyRes] = await Promise.all([
         MenuService.getAllItems(),
-        MenuService.getAllItemsDaily().catch(err => {
-          console.warn("Failed to fetch daily items independently.", err);
-          return [];
-        })
+        MenuService.getAllItemsDaily()
       ]);
 
-      let data = Array.isArray(inventoryRes) ? inventoryRes : (inventoryRes?.data || inventoryRes || []);
-      if (!Array.isArray(data)) data = [];
-      data = data.filter(item => item && (item.id !== undefined && item.id !== null));
-      setItemsData(data);
+      // 1. Process Inventory
+      let inventoryList = Array.isArray(inventoryRes) ? inventoryRes : (inventoryRes?.data || []);
+      setItemsData(inventoryList);
 
-      let dailyData = Array.isArray(dailyRes) ? dailyRes : (dailyRes?.data || dailyRes || []);
-      if (!Array.isArray(dailyData)) dailyData = [];
+      // 2. Process Daily Items
+      // The backend returns ItemDailyDTO objects. We display them directly.
+      let dailyList = Array.isArray(dailyRes) ? dailyRes : (dailyRes?.data || []);
 
-      const formattedDailyItems = dailyData.map(dailyItem => {
-        // With Surrogate Keys: dailyItem.id (or dailyId) is unique transaction ID. 
-        // dailyItem.itemId is the foreign key to ItemMaster.
-        let masterId = dailyItem.itemId || dailyItem.itemMasterId;
+      // Map backend DTOs to standard table format if needed, but keep them distinct
+      const formattedDaily = dailyList.map(item => ({
+        ...item,
+        id: item.dailyId || item.id, // Ensure unique ID for table key
+        itemId: item.itemId || item.itemMasterId, // Reference to Master
+        initialQty: item.initialQty,
+        soldQty: item.soldQty,
+        // If the backend DTO includes name/price/cat, use them. If not, match with inventory for display only.
+        itemName: item.itemName || inventoryList.find(inv => inv.id === (item.itemId || item.itemMasterId))?.itemName || "Unknown",
+        itemPrice: item.itemPrice || inventoryList.find(inv => inv.id === (item.itemId || item.itemMasterId))?.itemPrice || 0,
+        itemCategory: item.itemCategory || inventoryList.find(inv => inv.id === (item.itemId || item.itemMasterId))?.itemCategory || ""
+      }));
 
-        let inventoryItem = null;
-        if (masterId) {
-          inventoryItem = data.find(inv => String(inv.id) === String(masterId));
-        }
-
-        // Fallback: If Master ID is missing or not found, try to match by Item Name
-        if (!inventoryItem && dailyItem.itemName) {
-          inventoryItem = data.find(inv => inv.itemName.trim().toLowerCase() === dailyItem.itemName.trim().toLowerCase());
-          if (inventoryItem) {
-            masterId = inventoryItem.id;
-          }
-        }
-
-        // Final Fallback: Use surrogate ID if available (though less reliable for Master ID)
-        if (!masterId) {
-          masterId = dailyItem.id;
-        }
-
-        return {
-          ...dailyItem,
-          // Use Surrogate ID if available, else fall back to Master ID (legacy support)
-          id: dailyItem.dailyId || dailyItem.id || masterId,
-          // Ensure we preserve the Master ID for logic
-          itemId: masterId,
-          itemName: dailyItem.itemName || inventoryItem?.itemName || "Unknown Item",
-          itemPrice: dailyItem.itemPrice || inventoryItem?.itemPrice || 0,
-          itemCategory: dailyItem.itemCategory || inventoryItem?.itemCategory || "",
-          initialQty: dailyItem.initialQty || 1,
-          soldQty: dailyItem.soldQty || 0
-        };
-      });
-      setDailyMenuItems(formattedDailyItems);
+      setDailyMenuItems(formattedDaily);
 
     } catch (error) {
       console.error('Error fetching data:', error);
-      showSnackbar("Failed to fetch menu data. Check console for details.", "error");
+      showSnackbar("Failed to refresh menu data.", "error");
     }
   };
 
@@ -89,122 +58,128 @@ export default function MenuSelector() {
     fetchItemsData();
   }, []);
 
+  // --- Add to Daily (Drafting) ---
   const handleAddToDaily = (selectionModel) => {
     let selectedIds = [];
-    if (Array.isArray(selectionModel)) {
-      selectedIds = selectionModel;
-    } else if (selectionModel instanceof Set) {
-      selectedIds = Array.from(selectionModel);
-    } else if (selectionModel?.ids instanceof Set) {
-      selectedIds = Array.from(selectionModel.ids);
-    }
+    if (Array.isArray(selectionModel)) selectedIds = selectionModel;
+    else if (selectionModel instanceof Set) selectedIds = Array.from(selectionModel);
+    else if (selectionModel?.ids instanceof Set) selectedIds = Array.from(selectionModel.ids);
 
-    if (!selectedIds || selectedIds.length === 0) {
-      showSnackbar("No items selected", "info");
-      return;
-    }
+    if (!selectedIds.length) return;
 
-    const newItems = itemsData.filter(item =>
+    // Filter items from Inventory
+    const selectedMasterItems = itemsData.filter(item =>
       selectedIds.some(id => String(id) === String(item.id))
     );
 
-    const uniqueNewItems = newItems.filter(newItem =>
-      !dailyMenuItems.some(dailyItem => String(dailyItem.itemId) === String(newItem.id))
+    // Prevent Duplicates in Frontend Draft
+    const newItems = selectedMasterItems.filter(masterItem =>
+      !dailyMenuItems.some(dailyItem => String(dailyItem.itemId) === String(masterItem.id))
     );
 
-    if (uniqueNewItems.length === 0) {
-      showSnackbar("Selected items already in Daily Menu.", "warning");
+    if (newItems.length === 0) {
+      showSnackbar("Selected items are already in today's menu.", "warning");
       return;
     }
 
-    const itemsWithQty = uniqueNewItems.map(item => ({
+    // Create Draft Daily Items
+    const draftItems = newItems.map(item => ({
       ...item,
-      itemId: item.id, // Explicitly map Master ID for consistency
-      initialQty: 1,
-      soldQty: 0
+      id: `draft-${item.id}-${Date.now()}`, // Temporary ID for UI key
+      itemId: item.id, // Explicit link to Master
+      initialQty: 50, // Default start quantity
+      soldQty: 0,
+      isDraft: true // Mark as unsaved
     }));
 
-    setDailyMenuItems([...dailyMenuItems, ...itemsWithQty]);
-    showSnackbar(`Added ${itemsWithQty.length} items to selection.`, "success");
-  }
+    setDailyMenuItems([...dailyMenuItems, ...draftItems]);
+    showSnackbar(`Added ${draftItems.length} items to pending list. Set Qty & Confirm!`, "info");
+  };
 
   const handleUpdateQuantity = (id, newQty) => {
-    setDailyMenuItems(prevItems =>
-      prevItems.map(item =>
-        item.id == id ? { ...item, initialQty: parseInt(newQty) || 0 } : item
-      )
-    );
-  }
+    setDailyMenuItems(prev => prev.map(item =>
+      item.id === id ? { ...item, initialQty: parseInt(newQty) || 0 } : item
+    ));
+  };
 
-  const handleRemoveFromDaily = (id) => {
-    setDailyMenuItems(prevItems => prevItems.filter(item => item.id != id));
-  }
+  const handleRemoveFromDaily = async (id) => {
+    const idStr = String(id);
 
+    // 1. If Draft -> Just remove from Client State
+    if (idStr.startsWith('draft') || idStr.startsWith('dr')) {
+      setDailyMenuItems(prev => prev.filter(item => item.id !== id));
+      showSnackbar("Removed draft item.", "info");
+      return;
+    }
+
+    // 2. If Saved in DB -> Confirm & Call API
+    if (window.confirm("Delete this item from today's menu? This cannot be undone.")) {
+      try {
+        await MenuService.deleteDailyItem(id);
+        setDailyMenuItems(prev => prev.filter(item => item.id !== id));
+        showSnackbar("Deleted from Daily Menu.", "success");
+      } catch (error) {
+        console.error("Delete failed", error);
+        showSnackbar("Failed to delete from database.", "error");
+      }
+    }
+  };
+
+  // --- Confirm & Save ---
   const handleConfirmMenu = async () => {
-    if (dailyMenuItems.length === 0) {
-      showSnackbar("Daily menu is empty", "warning");
-      return;
-    }
-
-    if (!token) {
-      showSnackbar("Session expired. Please log in again.", "error");
-      return;
-    }
-
-    if (role !== 'ADMIN') {
-      showSnackbar(`Current role (${role}) is NOT Admin. Please log in as Admin.`, "error");
-      return;
-    }
-
+    if (!dailyMenuItems.length) return;
     setLoading(true);
+
+    // Only save items marked as 'draft' or if we want to update all, logic depends on backend capabilities.
+    // The previous logic attempted to save EVERYTHING. 
+    // Ideally, we should filter for "New" or "Modified" items, but to be safe and ensure sync, we can try saving all UNLESS they have a real 'dailyId'.
+    // However, the backend 'addDailyItem' often throws error if exists. 
+    // Let's focus on saving NEW items (drafts).
+
+    const itemsToSave = dailyMenuItems.filter(item => item.isDraft);
+
+    if (itemsToSave.length === 0) {
+      showSnackbar("No new items to save.", "info");
+      setLoading(false);
+      return;
+    }
+
     let successCount = 0;
     let failItems = [];
 
-    try {
-      console.log("Confirming Daily Menu (Sequential Loop):", dailyMenuItems);
-
-      // Sequentially add each item to the daily menu
-      for (const item of dailyMenuItems) {
-        try {
-          // IMPORTANT: The backend endpoint is POST /dailyitems/{itemMasId}
-          // We MUST use item.itemId (which maps to Master ID)
-          await MenuService.addDailyItem({ ...item, id: item.itemId });
-          successCount++;
-        } catch (err) {
-          console.error(`Failed to add item: ${item.itemName}`, err);
-          // Extract error message if available
-          const backendMsg = err.response?.data?.message || err.message || JSON.stringify(err);
-          failItems.push(`${item.itemName} (${backendMsg})`);
-        }
+    for (const item of itemsToSave) {
+      try {
+        await MenuService.addDailyItem({
+          id: item.itemId, // Master ID for the endpoint path
+          initialQty: item.initialQty,
+          itemName: item.itemName
+        });
+        successCount++;
+      } catch (err) {
+        failItems.push(item.itemName);
+        console.error("Save failed for:", item, err);
       }
-
-      if (failItems.length === 0) {
-        showSnackbar("Successfully saved all daily menu items!", "success");
-        fetchItemsData();
-      } else if (successCount > 0) {
-        showSnackbar(`Partially saved. Failed for: ${failItems.join(", ")}`, "warning");
-        fetchItemsData();
-      } else {
-        const firstError = failItems[0];
-        showSnackbar(`Failed to save: ${firstError}`, "error");
-      }
-    } catch (error) {
-      console.error("Confirm Process Error:", error);
-      showSnackbar("A critical error occurred while processing the menu.", "error");
-    } finally {
-      setLoading(false);
     }
-  }
+
+    setLoading(false);
+    if (failItems.length === 0) {
+      showSnackbar(`Saved ${successCount} new items successfully!`, "success");
+      fetchItemsData(); // Refresh to get real dailyIds
+    } else {
+      showSnackbar(`Saved ${successCount} items. Failed: ${failItems.join(", ")}`, "warning");
+      fetchItemsData();
+    }
+  };
 
   return (
     <Grid container spacing={2} sx={{ p: "10px" }}>
-      <Grid size={{ xs: 12, sm: 6 }}>
+      <Grid item xs={12} sm={6}>
         <ItemMasterTable
           items={itemsData}
           onAddItems={handleAddToDaily}
         />
       </Grid>
-      <Grid size={{ xs: 12, sm: 6 }}>
+      <Grid item xs={12} sm={6}>
         <ItemDailyTable
           items={dailyMenuItems}
           onUpdateQuantity={handleUpdateQuantity}
@@ -216,7 +191,7 @@ export default function MenuSelector() {
 
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={6000}
+        autoHideDuration={4000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
@@ -225,5 +200,5 @@ export default function MenuSelector() {
         </Alert>
       </Snackbar>
     </Grid>
-  )
+  );
 }

@@ -17,6 +17,13 @@ export default function ItemDailyTable({ items = [], onUpdateQuantity, onRemoveI
             field: "id",
             flex: 0.5,
             minWidth: 50,
+            renderCell: (params) => {
+                const id = String(params.value);
+                if (id.startsWith('draft') || id.startsWith('dr')) {
+                    return <Chip label="NEW" color="info" size="small" variant="outlined" sx={{ height: '20px', fontSize: '0.65rem' }} />;
+                }
+                return `D-${id}`;
+            }
         },
         {
             headerName: "Item Name",
