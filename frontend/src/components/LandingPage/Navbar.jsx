@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState } from "react";
-import Logo from "../../assets/cms-high-resolution-logo-removebg.png";
+// Logo is now served from public directory
 import HomeIcon from "@mui/icons-material/Home";
 import InfoIcon from "@mui/icons-material/Info";
 import CommentRoundedIcon from "@mui/icons-material/CommentRounded";
@@ -19,7 +19,7 @@ const Navbar = () => {
     >
       {/* Logo */}
       <div className="nav-logo-container">
-        <img src={Logo} style={{ height: "90px", width: "140px" }} alt="CMS" />
+        <img src="/foodimages/mealstack.png" style={{ height: "50px", width: "auto" }} alt="MealStack Logo" />
       </div>
 
       {/* Links */}

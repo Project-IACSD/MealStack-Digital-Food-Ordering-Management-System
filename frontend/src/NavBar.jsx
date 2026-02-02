@@ -8,7 +8,7 @@ import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import SearchIcon from "@mui/icons-material/Search";
-import cmslogo from './assets/cms-high-resolution-logo-removebg.png'
+// Logo is now served from public directory
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './auth/AuthContext';
 
@@ -46,7 +46,7 @@ export default function NavBar() {
         <IconButton type="button" sx={{ p: 1 }}>
           <SearchIcon />
         </IconButton> */}
-        <img src={cmslogo} alt='MealStack' style={{ width: '100px', height: "auto", backgroundColor: theme.palette.mode === "dark" ? colors.primary[500] : "#fcfcfc" }} />
+        <img src="/foodimages/mealstack.png" alt='MealStack Logo' style={{ height: '50px', width: "auto", backgroundColor: theme.palette.mode === "dark" ? colors.primary[500] : "#fcfcfc" }} />
 
 
       </Box>

@@ -1,6 +1,7 @@
 import React from "react";
+// Logo is now served from public directory
 // import Logo from "../../assets/Logo.svg";
-import Logo from "../../assets/cms-high-resolution-logo-removebg.png";
+// import Logo from "../../assets/cms-high-resolution-logo-removebg.png";
 import { BsTwitter } from "react-icons/bs";
 import { SiLinkedin } from "react-icons/si";
 import { BsYoutube } from "react-icons/bs";
@@ -11,7 +12,7 @@ const Footer = () => {
     <div className="footer-wrapper" style={{ padding: "0px 0px 30px 200px" }}>
       <div className="footer-section-one">
         <div className="footer-logo-container">
-          <img src={Logo} alt="" />
+          <img src="/foodimages/mealstack.png" alt="MealStack Logo" style={{ height: "50px", width: "auto" }} />
         </div>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&copy; {new Date().getFullYear()}
         <div className="footer-icons">
