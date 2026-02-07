@@ -10,12 +10,12 @@ export default defineConfig({
   server: {
     proxy: {
       '/student': {
-        target: 'http://localhost:8080',
+        target: process.env.VITE_API_BASE_URL || 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
         headers: {
-          Origin: 'http://localhost:8080',
-          Referer: 'http://localhost:8080/',
+          Origin: process.env.VITE_API_BASE_URL || 'http://localhost:8080',
+          Referer: (process.env.VITE_API_BASE_URL || 'http://localhost:8080') + '/',
         },
         bypass: (req, res, options) => {
           if (req.headers.accept && req.headers.accept.includes('text/html')) {
@@ -24,12 +24,12 @@ export default defineConfig({
         },
       },
       '/admin': {
-        target: 'http://localhost:8080',
+        target: process.env.VITE_API_BASE_URL || 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
         headers: {
-          Origin: 'http://localhost:8080',
-          Referer: 'http://localhost:8080/',
+          Origin: process.env.VITE_API_BASE_URL || 'http://localhost:8080',
+          Referer: (process.env.VITE_API_BASE_URL || 'http://localhost:8080') + '/',
         },
         bypass: (req, res, options) => {
           if (req.headers.accept && req.headers.accept.includes('text/html')) {
@@ -38,39 +38,39 @@ export default defineConfig({
         },
       },
       '/items': {
-        target: 'http://localhost:8080',
+        target: process.env.VITE_API_BASE_URL || 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
         headers: {
-          Origin: 'http://localhost:8080',
-          Referer: 'http://localhost:8080/',
+          Origin: process.env.VITE_API_BASE_URL || 'http://localhost:8080',
+          Referer: (process.env.VITE_API_BASE_URL || 'http://localhost:8080') + '/',
         },
       },
       '/dailyitems': {
-        target: 'http://localhost:8080',
+        target: process.env.VITE_API_BASE_URL || 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
         headers: {
-          Origin: 'http://localhost:8080',
-          Referer: 'http://localhost:8080/',
+          Origin: process.env.VITE_API_BASE_URL || 'http://localhost:8080',
+          Referer: (process.env.VITE_API_BASE_URL || 'http://localhost:8080') + '/',
         },
       },
       '/recharge': {
-        target: 'http://localhost:8080',
+        target: process.env.VITE_API_BASE_URL || 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
         headers: {
-          Origin: 'http://localhost:8080',
-          Referer: 'http://localhost:8080/',
+          Origin: process.env.VITE_API_BASE_URL || 'http://localhost:8080',
+          Referer: (process.env.VITE_API_BASE_URL || 'http://localhost:8080') + '/',
         },
       },
       '/orders': {
-        target: 'http://localhost:8080',
+        target: process.env.VITE_API_BASE_URL || 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
         headers: {
-          Origin: 'http://localhost:8080',
-          Referer: 'http://localhost:8080/',
+          Origin: process.env.VITE_API_BASE_URL || 'http://localhost:8080',
+          Referer: (process.env.VITE_API_BASE_URL || 'http://localhost:8080') + '/',
         },
       },
     },

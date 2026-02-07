@@ -1,9 +1,10 @@
 import axios from 'axios';
 
 // Create axios instance
-// Base URL is empty because we are using Vite proxy
+// In development, use Vite proxy (empty baseURL)
+// In production, use the backend URL from environment variable
 const api = axios.create({
-    baseURL: '',
+    baseURL: import.meta.env.PROD ? import.meta.env.VITE_API_BASE_URL : '',
     headers: {
         'Content-Type': 'application/json',
     },
