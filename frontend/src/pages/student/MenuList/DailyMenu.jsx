@@ -108,7 +108,7 @@ export default function DailyMenu() {
   if (!colors) return <div>Loading Theme...</div>;
 
   return (
-    <Box p={3} sx={{ backgroundColor: theme.palette.mode === "dark" ? colors.primary[500] : "#fcfcfc", minHeight: '100vh' }}>
+    <Box p={3} sx={{ backgroundColor: theme.palette.mode === "dark" ? colors.primary[500] : "#fcfcfc" }}>
       <Box textAlign="center" mb={4}>
         <Typography variant="h2" color={colors.grey[100]} fontWeight="bold">
           Daily Menu
@@ -194,7 +194,7 @@ export default function DailyMenu() {
             backgroundColor: colors.primary[400],
             borderRadius: '16px',
             position: 'sticky',
-            top: '100px'
+            top: '20px'
           }}>
             <Typography variant="h4" color={colors.grey[100]} gutterBottom>
               Your Cart

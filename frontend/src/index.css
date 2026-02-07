@@ -17,9 +17,14 @@ code {
 html,
 body,
 #root,
-.app,
-.content {
+.app {
   height: 100%;
+  width: 100%;
+  font-family: 'Source Sans 3', sans-serif
+}
+
+.content {
+  min-height: 100vh;
   width: 100%;
   font-family: 'Source Sans 3', sans-serif
 }
