@@ -45,5 +45,5 @@ npm run dev
 
 ## 📝 Credentials
 
-- **Admin Login**: `admin@gmail.com` / `admin`
+- **Admin Login**: `admin@gmail.com` / `admin123`
 - **Student Login**: Register new account or use existing
