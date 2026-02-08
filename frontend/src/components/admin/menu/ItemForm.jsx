@@ -87,7 +87,8 @@ export default function ItemForm(props) {
 
     const handleRemoveImage = (setFieldValue) => {
         setImagePreview("");
-        setFieldValue("itemImgLink", "");
+        setFieldValue("itemImage", "");
+        setFieldValue("itemImgLink", `https://via.placeholder.com/150?t=${Date.now()}`);
     };
 
     return (
