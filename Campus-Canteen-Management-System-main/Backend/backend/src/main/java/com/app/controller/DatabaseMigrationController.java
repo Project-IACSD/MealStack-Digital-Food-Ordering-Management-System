@@ -21,7 +21,7 @@ public class DatabaseMigrationController {
                 Statement stmt = conn.createStatement()) {
 
             // Execute the ALTER TABLE command
-            String sql = "ALTER TABLE item_master MODIFY COLUMN item_img_link LONGTEXT NOT NULL";
+            String sql = "ALTER TABLE item_master MODIFY COLUMN item_img_link LONGTEXT";
             stmt.executeUpdate(sql);
 
             return ResponseEntity.ok("Database column updated successfully! item_img_link is now LONGTEXT.");
