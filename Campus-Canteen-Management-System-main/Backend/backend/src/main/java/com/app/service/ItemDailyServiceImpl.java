@@ -46,7 +46,7 @@ public class ItemDailyServiceImpl implements ItemDailyService {
 
                     // Added fields for Frontend Display
                     dto.setItemPrice(item.getItem().getItemPrice());
-                    dto.setItemImgLink(item.getItem().getItemImgLink());
+                    dto.setItemImage(item.getItem().getItemImage());
                     dto.setItemCategory(item.getItem().getItemCategory().toString());
 
                     return dto;

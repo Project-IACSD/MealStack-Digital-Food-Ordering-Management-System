@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
 import com.app.dto.ApiResponse;
 import com.app.dto.ItemMasterDTO;
 import com.app.entities.ItemMaster;
@@ -18,13 +17,13 @@ import com.app.repository.ItemMasterRepository;
 
 @Service
 @Transactional
-public class ItemMasterServiceImpl implements ItemMasterService{
-	
+public class ItemMasterServiceImpl implements ItemMasterService {
+
 	@Autowired
 	private ItemMasterRepository itemRepo;
 	@Autowired
 	private ModelMapper mapper;
-	
+
 	@Override
 	public List<ItemMasterDTO> getAllMatserItems() {
 		List<ItemMaster> itemList = itemRepo.findAll();
@@ -33,11 +32,10 @@ public class ItemMasterServiceImpl implements ItemMasterService{
 
 	@Override
 	public ApiResponse deleteItemDetails(Long itemId) {
-		ItemMaster item = itemRepo.findById(itemId).orElseThrow(()-> new ResourceNotFoundException("Item not found"));
+		ItemMaster item = itemRepo.findById(itemId).orElseThrow(() -> new ResourceNotFoundException("Item not found"));
 		itemRepo.delete(item);
 		return new ApiResponse("Item Details of item with ID " + item.getId() + " deleted....");
 
-		
 	}
 
 	@Override
@@ -49,13 +47,13 @@ public class ItemMasterServiceImpl implements ItemMasterService{
 
 	@Override
 	public ItemMasterDTO updateItem(Long itemId, ItemMasterDTO dto) {
-		ItemMaster item = itemRepo.findById(itemId).
-		orElseThrow(() -> new ResourceNotFoundException("Invalid Item Id !!!!"));
+		ItemMaster item = itemRepo.findById(itemId)
+				.orElseThrow(() -> new ResourceNotFoundException("Invalid Item Id !!!!"));
 		item.setItemName(dto.getItemName());
 		item.setItemPrice(dto.getItemPrice());
 		item.setItemCategory(dto.getItemCategory());
 		item.setItemGenre(dto.getItemGenre());
-		item.setItemImgLink(dto.getItemImgLink());
+		item.setItemImage(dto.getItemImage());
 		item.setSoldQty(dto.getSoldQty());
 		item.setTotalQty(dto.getTotalQty());
 		return mapper.map(item, ItemMasterDTO.class);
@@ -63,11 +61,10 @@ public class ItemMasterServiceImpl implements ItemMasterService{
 
 	@Override
 	public ItemMasterDTO getItemDetails(Long itemId) {
-		
+
 		return mapper.map(
 				itemRepo.findById(itemId).orElseThrow(() -> new ResourceNotFoundException("Invalid Item Id !!!!")),
 				ItemMasterDTO.class);
 	}
-	
 
 }

@@ -15,26 +15,21 @@ import lombok.ToString;
 @Setter
 @ToString
 public class ItemMasterDTO {
-	@JsonProperty(access = Access.READ_ONLY) 
+	@JsonProperty(access = Access.READ_ONLY)
 	private Long id;
-	
+
 	@NotBlank
 	private String itemName;
-	
-	
+
 	private Integer itemPrice;
-	
-	
+
 	private ItemCategory itemCategory;
-	
+
 	private ItemGenre itemGenre;
-	
-	
-	private String itemImgLink;
-	
-	
+
+	private String itemImage;
+
 	private Integer totalQty;
-	
-	
+
 	private Integer soldQty;
 }

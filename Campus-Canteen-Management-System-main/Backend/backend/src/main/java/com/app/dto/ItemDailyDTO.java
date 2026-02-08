@@ -10,7 +10,7 @@ public class ItemDailyDTO {
 
     private String itemName;
     private Integer itemPrice;
-    private String itemImgLink;
+    private String itemImage;
     private String itemCategory;
 
     // ===== GETTERS =====
@@ -42,8 +42,8 @@ public class ItemDailyDTO {
         return itemPrice;
     }
 
-    public String getItemImgLink() {
-        return itemImgLink;
+    public String getItemImage() {
+        return itemImage;
     }
 
     public String getItemCategory() {
@@ -79,8 +79,8 @@ public class ItemDailyDTO {
         this.itemPrice = itemPrice;
     }
 
-    public void setItemImgLink(String itemImgLink) {
-        this.itemImgLink = itemImgLink;
+    public void setItemImage(String itemImage) {
+        this.itemImage = itemImage;
     }
 
     public void setItemCategory(String itemCategory) {
