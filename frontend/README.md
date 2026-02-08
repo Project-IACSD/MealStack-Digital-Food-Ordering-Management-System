@@ -1,16 +1,49 @@
-# React + Vite
+# MealStack - Digital Food Ordering Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A full-stack canteen management system built with Spring Boot (Backend) and React (Frontend).
 
-Currently, two official plugins are available:
+## 🚀 Deployment Links
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Frontend**: [https://meal-stack-digital-food-ordering-ma.vercel.app](https://meal-stack-digital-food-ordering-ma.vercel.app)
+- **Backend API**: [https://mealstack-digital-food-ordering.onrender.com](https://mealstack-digital-food-ordering.onrender.com)
+- **Database**: Railway MySQL
 
-## React Compiler
+## 🛠 Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend**: React, Material UI, Vite
+- **Backend**: Java Spring Boot, Hibernate, MySQL
+- **Database**: MySQL (Railway)
+- **Deployment**: Vercel (Frontend), Render (Backend), Railway (DB)
 
-## Expanding the ESLint configuration
+## 📸 Key Features
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **Student Portal**: View daily menu, order food, wallet management
+- **Admin Portal**: Manage menu, student management, order tracking
+- **Image Upload**: Base64 image storage (up to 4GB support)
+
+## 🔧 Database Schema Update (Feb 2026)
+
+The item image storage was upgraded to support large images:
+- **New Column**: `item_image` (LONGTEXT) - Stores Base64 images
+- **Legacy Column**: `item_img_link` was removed
+- **Default Image**: `dosa.jpg` is used as fallback
+
+## 🏃‍♂️ Running Locally
+
+### Backend
+```bash
+cd Campus-Canteen-Management-System-main/Backend/backend
+./mvnw spring-boot:run
+```
+
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## 📝 Credentials
+
+- **Admin Login**: `admin@gmail.com` / `admin`
+- **Student Login**: Register new account or use existing
