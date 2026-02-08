@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Snackbar } from '@mui/material';
+import { Alert, Snackbar, Box, Button } from '@mui/material';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import ListIcon from '@mui/icons-material/List';
 import StudentForm from '../../../components/admin/StudentForm';
 import StudentService from '../../../services/studentService';
 
@@ -8,6 +10,8 @@ export default function AddStudent() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [formKey, setFormKey] = useState(0); // Key to reset form
+  const formRef = useRef(null);
 
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
@@ -24,14 +28,12 @@ export default function AddStudent() {
       // Show success message
       setSnackbar({
         open: true,
-        message: `Student "${student.name}" added successfully!`,
+        message: `Student "${student.name}" added successfully! You can add another student or view all students.`,
         severity: 'success'
       });
 
-      // Redirect to student list after 1.5 seconds
-      setTimeout(() => {
-        navigate('/admin/students');
-      }, 1500);
+      // Reset form by changing key
+      setFormKey(prevKey => prevKey + 1);
 
     } catch (error) {
       console.error('Error adding student:', error);
@@ -59,12 +61,39 @@ export default function AddStudent() {
   return (
     <div>
       <StudentForm
+        key={formKey} // This will reset the form when key changes
         action="add"
         takeAction={addStudent}
         title="Add Student"
         subtitle="Student Registration Form"
         loading={loading}
       />
+
+      {/* Action Buttons */}
+      <Box
+        display="flex"
+        justifyContent="center"
+        gap={2}
+        mt={2}
+        mb={4}
+      >
+        <Button
+          variant="outlined"
+          color="primary"
+          startIcon={<PersonAddIcon />}
+          onClick={() => setFormKey(prevKey => prevKey + 1)}
+        >
+          Clear Form
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          startIcon={<ListIcon />}
+          onClick={() => navigate('/admin/students')}
+        >
+          View All Students
+        </Button>
+      </Box>
 
       <Snackbar
         open={snackbar.open}

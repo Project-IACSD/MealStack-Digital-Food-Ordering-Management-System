@@ -1,14 +1,21 @@
-import React from "react";
-import { Box, Button, TextField, MenuItem } from "@mui/material";
+import React, { useState } from "react";
+import { Box, Button, TextField, MenuItem, Typography, Avatar } from "@mui/material";
 import { Formik } from "formik";
 import * as yup from "yup";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Header from "../common/Header";
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import EditIcon from "@mui/icons-material/Edit";
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function ItemForm(props) {
     const isNonMobile = useMediaQuery("(min-width:600px)");
+    const [imagePreview, setImagePreview] = useState(
+        props.action === "edit" && props.itemData?.itemImgLink
+            ? props.itemData.itemImgLink
+            : ""
+    );
 
     const initValues =
         props.action === "add"
@@ -41,12 +48,42 @@ export default function ItemForm(props) {
         itemPrice: yup.number().required("Required").positive("Price must be positive"),
         itemCategory: yup.string().required("Required"),
         itemGenre: yup.string().required("Required"),
-        itemImgLink: yup.string().required("Required"),
+        itemImgLink: yup.string().required("Please upload an image"),
     });
 
     const handleFormSubmit = (values) => {
         console.log(values);
         props.takeAction(values);
+    };
+
+    const handleImageChange = (event, setFieldValue) => {
+        const file = event.target.files[0];
+        if (file) {
+            // Check file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert("Image size should be less than 5MB");
+                return;
+            }
+
+            // Check file type
+            if (!file.type.startsWith('image/')) {
+                alert("Please upload an image file");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64String = reader.result;
+                setImagePreview(base64String);
+                setFieldValue("itemImgLink", base64String);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleRemoveImage = (setFieldValue) => {
+        setImagePreview("");
+        setFieldValue("itemImgLink", "");
     };
 
     return (
@@ -70,6 +107,7 @@ export default function ItemForm(props) {
                         handleBlur,
                         handleChange,
                         handleSubmit,
+                        setFieldValue,
                     }) => {
                         return (
                             <form onSubmit={handleSubmit}>
@@ -147,19 +185,58 @@ export default function ItemForm(props) {
                                             </MenuItem>
                                         ))}
                                     </TextField>
-                                    <TextField
-                                        fullWidth
-                                        variant="filled"
-                                        type="text"
-                                        label="Image Link"
-                                        onBlur={handleBlur}
-                                        onChange={handleChange}
-                                        value={values.itemImgLink}
-                                        name="itemImgLink"
-                                        error={!!touched.itemImgLink && !!errors.itemImgLink}
-                                        helperText={touched.itemImgLink && errors.itemImgLink}
-                                        sx={{ gridColumn: "span 4" }}
-                                    />
+
+                                    {/* Image Upload Section */}
+                                    <Box sx={{ gridColumn: "span 4" }}>
+                                        <Typography variant="subtitle1" gutterBottom>
+                                            Item Image
+                                        </Typography>
+
+                                        {/* Image Preview */}
+                                        {imagePreview && (
+                                            <Box display="flex" alignItems="center" gap={2} mb={2}>
+                                                <Avatar
+                                                    src={imagePreview}
+                                                    alt="Item preview"
+                                                    sx={{ width: 100, height: 100 }}
+                                                    variant="rounded"
+                                                />
+                                                <Button
+                                                    variant="outlined"
+                                                    color="error"
+                                                    size="small"
+                                                    startIcon={<DeleteIcon />}
+                                                    onClick={() => handleRemoveImage(setFieldValue)}
+                                                >
+                                                    Remove Image
+                                                </Button>
+                                            </Box>
+                                        )}
+
+                                        {/* File Input */}
+                                        <Button
+                                            variant="contained"
+                                            component="label"
+                                            startIcon={<CloudUploadIcon />}
+                                            fullWidth
+                                        >
+                                            {imagePreview ? "Change Image" : "Upload Image"}
+                                            <input
+                                                type="file"
+                                                hidden
+                                                accept="image/*"
+                                                onChange={(e) => handleImageChange(e, setFieldValue)}
+                                            />
+                                        </Button>
+                                        {touched.itemImgLink && errors.itemImgLink && (
+                                            <Typography color="error" variant="caption" display="block" mt={1}>
+                                                {errors.itemImgLink}
+                                            </Typography>
+                                        )}
+                                        <Typography variant="caption" color="textSecondary" display="block" mt={1}>
+                                            Supported formats: JPG, PNG, GIF (Max 5MB)
+                                        </Typography>
+                                    </Box>
                                 </Box>
                                 <Box display="flex" justifyContent="end" mt="20px">
                                     <Button type="submit" color="secondary" variant="contained">
