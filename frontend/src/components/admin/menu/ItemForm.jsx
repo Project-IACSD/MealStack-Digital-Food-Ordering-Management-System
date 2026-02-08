@@ -12,8 +12,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 export default function ItemForm(props) {
     const isNonMobile = useMediaQuery("(min-width:600px)");
     const [imagePreview, setImagePreview] = useState(
-        props.action === "edit" && props.itemData?.itemImgLink
-            ? props.itemData.itemImgLink
+        props.action === "edit" && props.itemData?.itemImage
+            ? props.itemData.itemImage
             : ""
     );
 
@@ -24,7 +24,8 @@ export default function ItemForm(props) {
                 itemPrice: "",
                 itemCategory: "",
                 itemGenre: "SouthIndian",
-                itemImgLink: "",
+                itemImgLink: "https://via.placeholder.com/150",
+                itemImage: "",
             }
             : props.itemData;
 
@@ -48,7 +49,8 @@ export default function ItemForm(props) {
         itemPrice: yup.number().required("Required").positive("Price must be positive"),
         itemCategory: yup.string().required("Required"),
         itemGenre: yup.string().required("Required"),
-        itemImgLink: yup.string().required("Please upload an image"),
+        itemImgLink: yup.string(),
+        itemImage: yup.string().required("Please upload an image"),
     });
 
     const handleFormSubmit = (values) => {
@@ -75,7 +77,8 @@ export default function ItemForm(props) {
             reader.onloadend = () => {
                 const base64String = reader.result;
                 setImagePreview(base64String);
-                setFieldValue("itemImgLink", base64String);
+                setFieldValue("itemImage", base64String);
+                setFieldValue("itemImgLink", "https://via.placeholder.com/150");
             };
             reader.readAsDataURL(file);
         }
