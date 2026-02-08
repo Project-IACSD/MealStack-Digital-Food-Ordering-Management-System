@@ -24,7 +24,7 @@ export default function ItemForm(props) {
                 itemPrice: "",
                 itemCategory: "",
                 itemGenre: "SouthIndian",
-                itemImgLink: "https://via.placeholder.com/150",
+                itemImgLink: `https://via.placeholder.com/150?t=${Date.now()}`,
                 itemImage: "",
             }
             : props.itemData;
@@ -78,7 +78,8 @@ export default function ItemForm(props) {
                 const base64String = reader.result;
                 setImagePreview(base64String);
                 setFieldValue("itemImage", base64String);
-                setFieldValue("itemImgLink", "https://via.placeholder.com/150");
+                // Generate unique placeholder to avoid duplicate key constraint
+                setFieldValue("itemImgLink", `https://via.placeholder.com/150?t=${Date.now()}`);
             };
             reader.readAsDataURL(file);
         }
