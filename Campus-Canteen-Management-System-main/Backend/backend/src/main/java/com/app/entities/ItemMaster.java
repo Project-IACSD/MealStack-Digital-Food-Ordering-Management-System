@@ -32,9 +32,6 @@ public class ItemMaster {
 	@Column(name = "item_genre", nullable = false)
 	private ItemGenre itemGenre;
 
-	@Column(name = "item_img_link", nullable = false, columnDefinition = "LONGTEXT")
-	private String itemImgLink;
-
 	@Column(name = "item_image", columnDefinition = "LONGTEXT")
 	private String itemImage;
 
