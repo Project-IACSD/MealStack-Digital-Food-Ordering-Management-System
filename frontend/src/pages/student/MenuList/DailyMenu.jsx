@@ -22,8 +22,9 @@ import {
 import { tokens } from "../../../theme";
 import ItemDailyService from "../../../services/ItemDailyService";
 import { useNavigate } from "react-router-dom";
-// Use a placeholder if defimg fails import, but we'll try to import it safely or usage text
 import defimg from '../../../assets/pick-meals-image.png';
+// Use dosa image as default for menu items
+import dosaimg from '../../../../public/foodimages/dosa.jpg';
 
 export default function DailyMenu() {
   const navigate = useNavigate();
@@ -138,10 +139,10 @@ export default function DailyMenu() {
                   <CardMedia
                     component="img"
                     height="160"
-                    // Use itemImage if available (new field), else itemImgLink (legacy), else defimg
-                    image={item.itemImage || item.itemImgLink || defimg}
+                    // Use itemImage if available (new field), else itemImgLink (legacy), else dosa image
+                    image={item.itemImage || item.itemImgLink || "/foodimages/dosa.jpg"}
                     alt={item.itemName}
-                    onError={(e) => { e.target.src = defimg; }} // Fallback if URL fails
+                    onError={(e) => { e.target.src = "/foodimages/dosa.jpg"; }} // Fallback to dosa image
                     sx={{
                       objectFit: 'cover',
                       height: '160px',

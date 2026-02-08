@@ -34,7 +34,7 @@ const MenuItemCard = ({ item, orderQty, onAdd, onRemove }) => {
             <CardMedia
                 component="img"
                 height="140"
-                image={item.itemImage || item.itemImgLink || defimg}
+                image={item.itemImage || item.itemImgLink || "/foodimages/dosa.jpg"}
                 alt={item.itemName}
                 sx={{
                     objectFit: 'cover',
