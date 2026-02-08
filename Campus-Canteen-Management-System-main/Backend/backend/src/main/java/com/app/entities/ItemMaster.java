@@ -35,6 +35,9 @@ public class ItemMaster {
 	@Column(name = "item_img_link", nullable = false, columnDefinition = "LONGTEXT")
 	private String itemImgLink;
 
+	@Column(name = "item_image", columnDefinition = "LONGTEXT")
+	private String itemImage;
+
 	@Column(name = "total_qty", nullable = false, columnDefinition = "INT DEFAULT 0")
 	private Integer totalQty;
 
