@@ -138,8 +138,8 @@ export default function DailyMenu() {
                   <CardMedia
                     component="img"
                     height="160"
-                    // Use itemImgLink if available, else defimg. 
-                    image={item.itemImgLink ? item.itemImgLink : defimg}
+                    // Use itemImage if available (new field), else itemImgLink (legacy), else defimg
+                    image={item.itemImage || item.itemImgLink || defimg}
                     alt={item.itemName}
                     onError={(e) => { e.target.src = defimg; }} // Fallback if URL fails
                     sx={{
