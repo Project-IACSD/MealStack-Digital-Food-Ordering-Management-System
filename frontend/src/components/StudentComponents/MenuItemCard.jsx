@@ -14,6 +14,20 @@ import defimg from '../../assets/pick-meals-image.png';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 
+// Map item name/category to local food images
+const getItemImage = (item) => {
+    if (item.itemImage || item.itemImgLink) return item.itemImage || item.itemImgLink;
+    const name = (item.itemName || '').toLowerCase();
+    const category = (item.itemCategory || '').toLowerCase();
+    if (name.includes('dosa') || name.includes('dose')) return '/foodimages/dosa.jpg';
+    if (name.includes('idli') || name.includes('idili') || name.includes('idly')) return '/foodimages/idili.jpg';
+    if (name.includes('samosa')) return '/foodimages/samosa.png';
+    if (name.includes('pizza')) return '/foodimages/pizza.jpg';
+    if (category.includes('breakfast')) return '/foodimages/idili.jpg';
+    if (category.includes('lunch') || category.includes('snack')) return '/foodimages/samosa.png';
+    return '/foodimages/dosa.jpg';
+};
+
 const MenuItemCard = ({ item, orderQty, onAdd, onRemove }) => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
@@ -34,8 +48,9 @@ const MenuItemCard = ({ item, orderQty, onAdd, onRemove }) => {
             <CardMedia
                 component="img"
                 height="140"
-                image={item.itemImage || item.itemImgLink || "/foodimages/dosa.jpg"}
+                image={getItemImage(item)}
                 alt={item.itemName}
+                onError={(e) => { e.target.src = '/foodimages/samosa.png'; }}
                 sx={{
                     objectFit: 'cover',
                     height: '140px',

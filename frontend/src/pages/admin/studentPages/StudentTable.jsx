@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Box, Typography, useTheme, Button } from "@mui/material";
 import { tokens } from "../../../theme";
-import { mockData } from "../MockData";
+
 import { DataGrid, GridActionsCellItem } from "@mui/x-data-grid";
 import Header from "../../../components/admin/common/Header";
 import EditIcon from "@mui/icons-material/Edit";
@@ -44,7 +44,6 @@ export default function StudentTable() {
       // Handle both array response and object with data property
       const data = Array.isArray(response) ? response : (response?.data || response || []);
       setStudentsData(data);
-      console.log('Students data:', data);
 
     } catch (error) {
       console.error('Error fetching students data:', error);

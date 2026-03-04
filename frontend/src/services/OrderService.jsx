@@ -76,6 +76,15 @@ class OrderService {
             throw error.response?.data || error.message;
         }
     }
+
+    async markPaymentSuccess(orderId, razorpayPaymentId) {
+        try {
+            const response = await api.post(`/orders/${orderId}/payment-success`, { razorpayPaymentId });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
 }
 
 export default new OrderService();

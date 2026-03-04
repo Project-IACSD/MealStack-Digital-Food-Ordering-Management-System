@@ -53,15 +53,17 @@ public class Order {
     @Column(name = "discount_percentage")
     private Integer discountPercentage;
 
+    @Column(name = "payment_status", nullable = false)
+    private String paymentStatus = "PENDING"; // PENDING | PAID | FAILED
+
+    @Column(name = "razorpay_payment_id")
+    private String razorpayPaymentId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id")
     private Student student;
 
-    @OneToMany(
-            mappedBy = "order",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Cart> cartList = new ArrayList<>();
 
     // ===== GETTERS =====
@@ -104,6 +106,14 @@ public class Order {
 
     public Integer getDiscountPercentage() {
         return discountPercentage;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public String getRazorpayPaymentId() {
+        return razorpayPaymentId;
     }
 
     public Student getStudent() {
@@ -154,6 +164,14 @@ public class Order {
 
     public void setDiscountPercentage(Integer discountPercentage) {
         this.discountPercentage = discountPercentage;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public void setRazorpayPaymentId(String razorpayPaymentId) {
+        this.razorpayPaymentId = razorpayPaymentId;
     }
 
     public void setStudent(Student student) {

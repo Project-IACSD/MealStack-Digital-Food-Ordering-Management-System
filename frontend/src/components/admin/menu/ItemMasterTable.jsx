@@ -22,47 +22,42 @@ export default function ItemMasterTable({ items = [], onAddItems }) {
       type: "number",
       headerAlign: "left",
       align: "left",
-      flex: 1
+      flex: 0.5
     },
     {
       headerName: "Item Name",
       field: "itemName",
-      headerAlign: "center",
-      align: "center",
-      flex: 1
+      headerAlign: "left",
+      align: "left",
+      flex: 2
     },
     {
-      headerName: "Item Price",
+      headerName: "Price (₹)",
       field: "itemPrice",
       type: "number",
+      headerAlign: "left",
+      align: "left",
+      flex: 0.8
+    },
+    {
+      headerName: "Category",
+      field: "itemCategory",
+      type: "text",
       headerAlign: "left",
       align: "left",
       flex: 1
     },
     {
-      headerName: "Item Category",
-      field: "itemCategory",
-      type: "text",
-      headerAlign: "center",
-      align: "center",
-      flex: 1
-    },
-    {
       field: "actions",
       headerName: "Actions",
-      flex: 0.5,
+      flex: 1,
       renderCell: ({ row: { id } }) => {
         return (
-          <Box
-            width="60%"
-            m="0 auto"
-            p="5px"
-            display="flex"
-            justifyContent="center"
-          >
+          <Box display="flex" gap={1}>
             <Button
               color="secondary"
               variant="contained"
+              size="small"
               onClick={() => navigate(`/admin/menu/edit/${id}`)}
               startIcon={<EditIcon />}
             >
@@ -92,17 +87,13 @@ export default function ItemMasterTable({ items = [], onAddItems }) {
         subtitle="All menu items previously registered"
       ></Header>
       <Box
-        m="40px 0 0 0"
-        height="75vh"
+        m="20px 0 0 0"
         sx={{
           "& .MuiDataGrid-root": {
             border: "none",
           },
           "& .MuiDataGrid-cell": {
             borderBottom: "none",
-          },
-          "& .name-column--cell": {
-            color: colors.greenAccent[300],
           },
           "& .MuiDataGrid-columnHeaders": {
             backgroundColor: colors.blueAccent[800],
@@ -126,8 +117,9 @@ export default function ItemMasterTable({ items = [], onAddItems }) {
           columns={colStructure}
           checkboxSelection
           disableRowSelectionOnClick
+          autoHeight
           initialState={{
-            pagination: { paginationModel: { pageSize: 5 } },
+            pagination: { paginationModel: { pageSize: 10 } },
           }}
           pageSizeOptions={[5, 10, 25]}
           onRowSelectionModelChange={(newRowSelectionModel) => {

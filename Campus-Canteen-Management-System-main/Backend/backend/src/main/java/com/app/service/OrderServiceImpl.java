@@ -292,4 +292,18 @@ public class OrderServiceImpl implements OrderService {
 		return mapper.map(updatedOrder, OrderDTO.class);
 	}
 
+	@Override
+	@Transactional
+	public OrderDTO markPaymentSuccess(Long orderId, String razorpayPaymentId) {
+		Order order = orderRepository.findById(orderId)
+				.orElseThrow(() -> new ResourceNotFoundException("Order not found with ID: " + orderId));
+
+		order.setPaymentStatus("PAID");
+		order.setRazorpayPaymentId(razorpayPaymentId);
+		order.setPaymentMethod("ONLINE");
+
+		Order updatedOrder = orderRepository.save(order);
+		return mapper.map(updatedOrder, OrderDTO.class);
+	}
+
 }

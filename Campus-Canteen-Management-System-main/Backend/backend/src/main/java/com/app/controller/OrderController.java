@@ -91,4 +91,13 @@ public class OrderController {
         OrderDTO updatedOrder = orderService.updateOrderStatus(orderId, status);
         return ResponseEntity.ok(updatedOrder);
     }
+
+    @PostMapping("/{orderId}/payment-success")
+    public ResponseEntity<OrderDTO> markPaymentSuccess(
+            @PathVariable Long orderId,
+            @RequestBody java.util.Map<String, String> body) {
+        String razorpayPaymentId = body.get("razorpayPaymentId");
+        OrderDTO updatedOrder = orderService.markPaymentSuccess(orderId, razorpayPaymentId);
+        return ResponseEntity.ok(updatedOrder);
+    }
 }

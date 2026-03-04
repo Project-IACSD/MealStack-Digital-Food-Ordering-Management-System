@@ -26,13 +26,25 @@ import ItemDailyService from "../../../services/ItemDailyService";
 import { useNavigate } from "react-router-dom";
 import SearchIcon from '@mui/icons-material/Search';
 import defimg from '../../../assets/pick-meals-image.png';
-// Use dosa image as default for menu items
-import dosaimg from '../../../../public/foodimages/dosa.jpg';
 
 export default function DailyMenu() {
   const navigate = useNavigate();
   const theme = useTheme();
-  // Safe fallback for tokens
+
+  // Map item names/categories to available images in /public/foodimages/
+  const getItemImage = (item) => {
+    if (item.itemImage || item.itemImgLink) return item.itemImage || item.itemImgLink;
+    const name = (item.itemName || '').toLowerCase();
+    const category = (item.itemCategory || '').toLowerCase();
+    if (name.includes('dosa') || name.includes('dose')) return '/foodimages/dosa.jpg';
+    if (name.includes('idli') || name.includes('idili') || name.includes('idly')) return '/foodimages/idili.jpg';
+    if (name.includes('samosa')) return '/foodimages/samosa.png';
+    if (name.includes('pizza')) return '/foodimages/pizza.jpg';
+    // Category-based fallbacks
+    if (category.includes('breakfast')) return '/foodimages/idili.jpg';
+    if (category.includes('lunch') || category.includes('snack')) return '/foodimages/samosa.png';
+    return '/foodimages/dosa.jpg'; // last resort
+  };
   const colors = tokens ? tokens(theme.palette.mode) : { grey: { 100: "#ccc" }, primary: { 400: "#333", 500: "#000" }, greenAccent: { 500: "green" } };
 
   const [menuItems, setMenuItems] = useState([]);
@@ -162,10 +174,9 @@ export default function DailyMenu() {
                   <CardMedia
                     component="img"
                     height="160"
-                    // Use itemImage if available (new field), else itemImgLink (legacy), else dosa image
-                    image={item.itemImage || item.itemImgLink || "/foodimages/dosa.jpg"}
+                    image={getItemImage(item)}
                     alt={item.itemName}
-                    onError={(e) => { e.target.src = "/foodimages/dosa.jpg"; }} // Fallback to dosa image
+                    onError={(e) => { e.target.src = '/foodimages/samosa.png'; }}
                     sx={{
                       objectFit: 'cover',
                       height: '160px',

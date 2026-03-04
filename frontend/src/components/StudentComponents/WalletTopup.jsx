@@ -23,6 +23,7 @@ import StudentService from "../../services/studentService";
 import RechargeHistoryService from "../../services/RechargeHistoryService";
 import { useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify';
+import { useRazorpay } from '../../hooks/useRazorpay';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import AddCardIcon from '@mui/icons-material/AddCard';
 import SecurityIcon from '@mui/icons-material/Security';
@@ -34,6 +35,8 @@ export default function WalletTopup() {
   const colors = tokens(theme.palette.mode);
 
   const [balance, setBalance] = useState(null);
+  const { initiatePayment } = useRazorpay();
+
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
   const [openConfirm, setOpenConfirm] = useState(false);
@@ -85,69 +88,36 @@ export default function WalletTopup() {
     }
   };
 
-  const loadRazorpayScript = () => {
-    return new Promise((resolve) => {
-      const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
-      script.onload = () => resolve(true);
-      script.onerror = () => resolve(false);
-      document.body.appendChild(script);
-    });
-  };
-
   const handleConfirmPayment = async () => {
     setOpenConfirm(false);
     setLoading(true);
 
-    const res = await loadRazorpayScript();
-    if (!res) {
-      alert("Razorpay SDK failed to load. Please check your internet connection.");
-      setLoading(false);
-      return;
-    }
-
-    const options = {
-      key: "rzp_test_AtG9VVI9mbh1sa", // Test Key
-      amount: Number(amount) * 100,
-      currency: "INR",
-      name: "Campus Canteen",
-      description: "Wallet Top-up",
-      image: "https://cdn-icons-png.flaticon.com/512/272/272525.png", // Optional Logo
-      handler: async function (response) {
+    await initiatePayment({
+      amount,
+      name: 'MealStack',
+      description: 'Wallet Top-Up',
+      onSuccess: async (razorpayPaymentId) => {
         try {
           await RechargeHistoryService.addRechargeHistory({
             studentId: Number(studentId),
             amountAdded: Number(amount),
-            paymentId: response.razorpay_payment_id,
+            paymentId: razorpayPaymentId,
             transactionId: 0
           });
-
-          // Success Feedback
-          toast.success("Top-up Successful! Balance Updated.");
-          navigate("/student/rechargehistory");
+          toast.success('Top-up Successful! Balance Updated.');
+          navigate('/student/rechargehistory');
         } catch (err) {
-          console.error("Recharge saving failed", err);
-          toast.error("Payment successful but failed to update record. Please contact admin.");
-          navigate("/student/rechargehistory");
+          console.error('Recharge saving failed', err);
+          toast.error('Payment successful but failed to update record. Please contact admin.');
+          navigate('/student/rechargehistory');
         } finally {
           setLoading(false);
         }
       },
-      prefill: {
-        name: "Student",
-        email: "student@example.com",
-        contact: "9999999999"
-      },
-      theme: { color: colors.blueAccent[500] },
-      modal: {
-        ondismiss: function () {
-          setLoading(false);
-        }
+      onFailure: () => {
+        setLoading(false);
       }
-    };
-
-    const rzp = new window.Razorpay(options);
-    rzp.open();
+    });
   };
 
   return (
