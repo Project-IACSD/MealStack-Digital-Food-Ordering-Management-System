@@ -8,6 +8,8 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import PaymentIcon from '@mui/icons-material/Payment';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { getStudentId } from "../../utils/jwtUtils";
+import { toast } from 'react-toastify';
+import { useRazorpay } from "../../hooks/useRazorpay";
 
 export default function PlaceOrder() {
   const location = useLocation();
@@ -23,6 +25,7 @@ export default function PlaceOrder() {
   const [error, setError] = useState("");
 
   const studentId = getStudentId();
+  const { initiatePayment, loading: rzpLoading } = useRazorpay();
 
   useEffect(() => {
     if (studentId) {
@@ -32,6 +35,15 @@ export default function PlaceOrder() {
       navigate("/student/todaysmenu");
     }
   }, [studentId, order, navigate]);
+
+  const buildOrderPayload = () => ({
+    studentId: studentId,
+    items: order.map(item => ({
+      itemId: item.itemMasterId || item.itemId || item.id,
+      qtyOrdered: item.quantity,
+      itemPrice: item.itemPrice
+    }))
+  });
 
   const handlePayByWallet = async () => {
     setLoading(true);
@@ -44,32 +56,18 @@ export default function PlaceOrder() {
       // 1. Deduct balance
       await StudentService.deductBalance(studentId, totalAmount);
 
-      // 2. Create Order in backend
-      // Backend expects PlaceOrderRequest with items list
-      const orderPayload = {
-        studentId: studentId,
-        items: order.map(item => ({
-          itemId: item.itemMasterId || item.itemId || item.id, // Use Master ID, itemId, or id as fallback
-          qtyOrdered: item.quantity,
-          itemPrice: item.itemPrice
-        }))
-      };
-
-      await OrderService.insertOrder(orderPayload);
+      // 2. Create Order
+      await OrderService.insertOrder(buildOrderPayload());
 
       setSuccess(true);
+      toast.success("Order placed successfully!");
       setTimeout(() => navigate("/student/orderhistory"), 2000);
     } catch (err) {
-      console.error("Order placement failed:", err);
-      // Extract meaningful error message
       let errorMessage = "Payment failed";
-      if (err.response && err.response.data) {
-        // If it's a map (Validation errors)
-        if (typeof err.response.data === 'object' && !err.response.data.message) {
-          errorMessage = "Validation Error: " + JSON.stringify(err.response.data);
-        } else {
-          errorMessage = err.response.data.message || err.response.data;
-        }
+      if (err.response?.data) {
+        errorMessage = typeof err.response.data === 'object' && !err.response.data.message
+          ? "Validation Error: " + JSON.stringify(err.response.data)
+          : err.response.data.message || err.response.data;
       } else if (err.message) {
         errorMessage = err.message;
       }
@@ -79,103 +77,50 @@ export default function PlaceOrder() {
     }
   };
 
-  const loadRazorpayScript = () => {
-    return new Promise((resolve) => {
-      const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
-      script.onload = () => {
-        resolve(true);
-      };
-      script.onerror = () => {
-        resolve(false);
-      };
-      document.body.appendChild(script);
-    });
-  };
-
   const handlePayByRazorpay = async () => {
-    const res = await loadRazorpayScript();
+    setError("");
+    setLoading(true);
 
-    if (!res) {
-      alert("Razorpay SDK failed to load. Are you online?");
+    let createdOrderId = null;
+
+    try {
+      // 1. Create order in backend first
+      const createdOrder = await OrderService.insertOrder(buildOrderPayload());
+      createdOrderId = createdOrder?.orderId || createdOrder?.data?.orderId;
+    } catch (err) {
+      setError("Failed to create order. Please try again.");
+      setLoading(false);
       return;
     }
 
-    if (window.Razorpay) {
-      const options = {
-        key: "rzp_test_AtG9VVI9mbh1sa",
-        amount: totalAmount * 100,
-        currency: "INR",
-        name: "Campus Canteen System",
-        description: "Order Payment",
-        config: {
-          display: {
-            blocks: {
-              upi: {
-                name: "Pay via UPI",
-                instruments: [
-                  {
-                    method: "upi"
-                  }
-                ]
-              },
-              other: {
-                name: "Other Payment Modes",
-                instruments: [
-                  {
-                    method: "card"
-                  },
-                  {
-                    method: "netbanking"
-                  },
-                  {
-                    method: "wallet"
-                  }
-                ]
-              }
-            },
-            sequence: ["block.upi", "block.other"],
-            preferences: {
-              show_default_blocks: false
-            }
+    // 2. Open Razorpay
+    await initiatePayment({
+      amount: totalAmount,
+      name: 'MealStack',
+      description: 'Food Order Payment',
+      onSuccess: async (razorpayPaymentId) => {
+        try {
+          // 3. Mark payment success in backend
+          if (createdOrderId) {
+            await OrderService.markPaymentSuccess(createdOrderId, razorpayPaymentId);
           }
-        },
-        handler: async (response) => {
-          setLoading(true);
-          try {
-            await OrderService.insertOrder({
-              studentId: studentId,
-              items: order.map(item => ({
-                itemId: item.itemMasterId || item.itemId || item.id, // Use Master ID, itemId, or id as fallback
-                qtyOrdered: item.quantity,
-                itemPrice: item.itemPrice
-              }))
-              // Status and Transaction ID should ideally be handled backend or sent if backend supports
-              // But PlaceOrderRequest only has items. 
-              // If backend doesn't support transactionId update here, we might need a separate call
-              // or just rely on items for now.
-            });
-            setSuccess(true);
-            setTimeout(() => navigate("/student/orderhistory"), 2000);
-          } catch (e) {
-            setError("Order record failed after payment");
-          } finally {
-            setLoading(false);
-          }
-        },
-        prefill: {
-          name: "Student",
-          email: `student${studentId}@examples.com`,
-          contact: "9999999999"
-        },
-        theme: { color: colors.blueAccent[500] }
-      };
-      const rzp = new window.Razorpay(options);
-      rzp.open();
-    } else {
-      alert("Razorpay SDK not loaded");
-    }
+          setSuccess(true);
+          toast.success("Payment successful! Order placed.");
+          setTimeout(() => navigate("/student/orderhistory"), 2000);
+        } catch (e) {
+          toast.error("Order record failed after payment. Contact admin.");
+        } finally {
+          setLoading(false);
+        }
+      },
+      onFailure: (reason) => {
+        toast.error(reason === 'Payment cancelled' ? "Payment cancelled." : "Payment failed. Please try again.");
+        setLoading(false);
+      }
+    });
   };
+
+  const isLoading = loading || rzpLoading;
 
   if (success) {
     return (
@@ -254,9 +199,9 @@ export default function PlaceOrder() {
                   variant="contained"
                   color="secondary"
                   sx={{ mt: 2 }}
-                  disabled={loading || totalAmount > (balance || 0)}
+                  disabled={isLoading || totalAmount > (balance || 0)}
                 >
-                  {loading ? <CircularProgress size={24} /> : "Pay with Wallet"}
+                  {isLoading ? <CircularProgress size={24} /> : "Pay with Wallet"}
                 </Button>
               </CardContent>
             </Card>
@@ -268,21 +213,22 @@ export default function PlaceOrder() {
               border: "2px solid",
               borderColor: "transparent",
               "&:hover": { borderColor: colors.blueAccent[500] }
-            }} onClick={handlePayByRazorpay}>
+            }} onClick={!isLoading ? handlePayByRazorpay : undefined}>
               <CardContent>
                 <Box display="flex" alignItems="center" gap={2}>
                   <PaymentIcon sx={{ color: colors.blueAccent[500] }} />
                   <Box>
                     <Typography variant="h6" color={colors.grey[100]}>Online Payment</Typography>
-                    <Typography variant="body2" color={colors.grey[300]}>Credit Card, UPI, etc.</Typography>
+                    <Typography variant="body2" color={colors.grey[300]}>Credit Card, UPI, Net Banking</Typography>
                   </Box>
                 </Box>
                 <Button
                   fullWidth
                   variant="contained"
                   sx={{ mt: 2, backgroundColor: colors.blueAccent[600] }}
+                  disabled={isLoading}
                 >
-                  Pay Online
+                  {rzpLoading ? <CircularProgress size={24} /> : "Pay Online"}
                 </Button>
               </CardContent>
             </Card>

@@ -42,12 +42,9 @@ const StudentDashboard = () => {
   useEffect(() => {
     const studentId = user?.id || user?.studentId || localStorage.getItem("studentId");
 
-    console.log("Dashboard: Loaded. User:", user, "StudentId:", studentId);
-
     if (studentId) {
       fetchData(studentId);
     } else {
-      console.warn("Dashboard: No Student ID found.");
       setLoading(false);
     }
   }, [user]);
@@ -71,7 +68,6 @@ const StudentDashboard = () => {
       setOrders(orderList);
 
     } catch (error) {
-      console.error("Error fetching dashboard data", error);
     } finally {
       setLoading(false);
     }

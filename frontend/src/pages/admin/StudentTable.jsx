@@ -1,5 +1,4 @@
-import React , {useMemo, useEffect, useState} from 'react'
-import MockData from '../../assets/CT_MockData.json'
+import React, { useMemo, useEffect, useState } from 'react'
 import StudentService from '../../services/studentService';
 import TableColumnFilter from '../../components/common/TableColumnFilter'
 import { CustomerTableColumns } from '../../components/admin/CustomerTableColumns'
@@ -7,24 +6,24 @@ import TableComponent from '../../components/common/TableComponent'
 
 export default function CustomerTable1() {
   //const studentData = StudentService.getAllStudents(); //new added student from backend
-    
 
-    // const columns = useMemo(()=>CustomerTableColumns,[]) 
 
-    // const getStudents = () =>{StudentService.getAllStudents().then((response) => {
-     
-    //   console.log("in get Students")
-    //   return response.data.token;
-    //   })
-    //   .catch((error) => {
-    //       console.log(error);
-    //   }) };
+  // const columns = useMemo(()=>CustomerTableColumns,[]) 
 
-    //   console.log(getStudents)
-    // const data = useMemo(()=> MockData ,[])
-    //-----------------------------------------------
+  // const getStudents = () =>{StudentService.getAllStudents().then((response) => {
 
-    const columns = useMemo(() => CustomerTableColumns, []);
+  //   console.log("in get Students")
+  //   return response.data.token;
+  //   })
+  //   .catch((error) => {
+  //       console.log(error);
+  //   }) };
+
+  //   console.log(getStudents)
+  // const data = useMemo(()=> MockData ,[])
+  //-----------------------------------------------
+
+  const columns = useMemo(() => CustomerTableColumns, []);
 
   // State to hold the student data
   const [studentsData, setStudentsData] = useState([]);
@@ -34,8 +33,6 @@ export default function CustomerTable1() {
     try {
       const response = await StudentService.getAllStudents();
       setStudentsData(response.data); // Update state with fetched data
-      console.log(studentsData);
-      
     } catch (error) {
       console.error('Error fetching students data:', error);
     }
@@ -44,8 +41,8 @@ export default function CustomerTable1() {
   // Fetch students data on component mount
   useEffect(() => {
     fetchStudentsData();
-  }, []); 
-    // console.log("data "+data);
+  }, []);
+  // console.log("data "+data);
   return (
     <div>
       {/* Render TableComponent only when studentsData is not empty */}

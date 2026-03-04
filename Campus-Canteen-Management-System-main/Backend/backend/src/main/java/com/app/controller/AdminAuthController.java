@@ -34,7 +34,10 @@ public class AdminAuthController {
     @PostMapping("/login")
     public ResponseEntity<?> adminLogin(@RequestBody SignInDTO dto) {
 
-        User admin = userRepository.findByEmail(dto.getUserName())
+        // Normalize email input
+        String normalizedEmail = dto.getUserName().trim().toLowerCase();
+
+        User admin = userRepository.findByEmail(normalizedEmail)
                 .orElseThrow(() -> new RuntimeException("Invalid admin email"));
 
         if (admin.getRole() != Role.ADMIN) {

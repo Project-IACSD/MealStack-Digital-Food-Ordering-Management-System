@@ -172,14 +172,16 @@ export default function MenuSelector() {
   };
 
   return (
-    <Grid container spacing={2} sx={{ p: "10px" }}>
-      <Grid item xs={12} sm={6}>
+    <Grid container spacing={3} sx={{ p: "20px" }}>
+      {/* Inventory Table - Full Width */}
+      <Grid item xs={12}>
         <ItemMasterTable
           items={itemsData}
           onAddItems={handleAddToDaily}
         />
       </Grid>
-      <Grid item xs={12} sm={6}>
+      {/* Daily Menu Table - Full Width */}
+      <Grid item xs={12}>
         <ItemDailyTable
           items={dailyMenuItems}
           onUpdateQuantity={handleUpdateQuantity}
@@ -202,3 +204,4 @@ export default function MenuSelector() {
     </Grid>
   );
 }
+

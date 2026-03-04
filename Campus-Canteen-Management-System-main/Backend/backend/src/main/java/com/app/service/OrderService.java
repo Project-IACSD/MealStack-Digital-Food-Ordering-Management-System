@@ -23,4 +23,6 @@ public interface OrderService {
 
     OrderDTO updateOrderStatus(Long orderId, OrderStatus status);
 
+    OrderDTO markPaymentSuccess(Long orderId, String razorpayPaymentId);
+
 }

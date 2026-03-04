@@ -8,6 +8,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { useNavigate } from "react-router-dom";
 import OrderService from "../../../services/OrderService";
+import { toast } from 'react-toastify';
 
 export default function PendingOrderTable() {
   const theme = useTheme();
@@ -39,7 +40,7 @@ export default function PendingOrderTable() {
       await OrderService.updateOrderStatus(params.id, "SERVED");
 
       // Show success message
-      alert(`Order #${params.id} marked as completed successfully!`);
+      toast.success(`Order #${params.id} marked as completed!`);
 
       // Refresh pending orders list
       await loadPendingOrders();
@@ -48,7 +49,7 @@ export default function PendingOrderTable() {
 
       // Show detailed error message
       const errorMsg = error.response?.data?.message || error.message || "Unknown error";
-      alert(`Failed to mark order as completed: ${errorMsg}`);
+      toast.error(`Failed to mark order as completed: ${errorMsg}`);
     }
   };
 

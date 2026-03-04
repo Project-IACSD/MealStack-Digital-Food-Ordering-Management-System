@@ -9,7 +9,7 @@ import { FaFacebookF } from "react-icons/fa";
 
 const Footer = () => {
   return (
-    <div className="footer-wrapper" style={{ padding: "0px 0px 30px 200px" }}>
+    <div className="footer-wrapper" style={{ padding: "30px 20px" }}>
       <div className="footer-section-one">
         <div className="footer-logo-container">
           <img src="/foodimages/mealstack.png" alt="MealStack Logo" style={{ height: "50px", width: "auto" }} />
