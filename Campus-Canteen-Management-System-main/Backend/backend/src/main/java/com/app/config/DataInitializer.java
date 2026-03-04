@@ -14,24 +14,27 @@ public class DataInitializer {
 
     @Bean
     CommandLineRunner createAdmin(UserRepository userRepository,
-                                  PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder) {
 
         return args -> {
             userRepository.findByEmail("admin@gmail.com")
-                .ifPresentOrElse(
-                    user -> {
-                        // admin already exists → do nothing
-                    },
-                    () -> {
-                        User admin = new User();
-                        admin.setEmail("admin@gmail.com");
-                        admin.setPassword(passwordEncoder.encode("admin123"));
-                        admin.setRole(Role.ADMIN);
-                        userRepository.save(admin);
+                    .ifPresentOrElse(
+                            user -> {
+                                // admin exists → update password to ensure it's correct
+                                user.setPassword(passwordEncoder.encode("admin123"));
+                                user.setRole(Role.ADMIN);
+                                userRepository.save(user);
+                                System.out.println("✅ Admin user password updated");
+                            },
+                            () -> {
+                                User admin = new User();
+                                admin.setEmail("admin@gmail.com");
+                                admin.setPassword(passwordEncoder.encode("admin123"));
+                                admin.setRole(Role.ADMIN);
+                                userRepository.save(admin);
 
-                        System.out.println("✅ Admin user created");
-                    }
-                );
+                                System.out.println("✅ Admin user created");
+                            });
         };
     }
 }

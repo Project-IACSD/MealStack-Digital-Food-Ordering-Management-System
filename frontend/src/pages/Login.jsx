@@ -64,7 +64,12 @@ const Login = () => {
         if (result.success) navigate('/admin/dashboard');
       }
     } catch (err) {
-      setError(err?.message || 'Login failed. Invalid credentials.');
+      // Display detailed error for debugging
+      const errorMessage = err?.message ||
+        (typeof err === 'string' ? err : JSON.stringify(err)) ||
+        'Login failed. Invalid credentials.';
+      setError(errorMessage);
+      console.error('Login error details:', err);
     } finally {
       setLoading(false);
     }

@@ -22,6 +22,7 @@ import Header from "../admin/common/Header";
 import StudentService from "../../services/studentService";
 import RechargeHistoryService from "../../services/RechargeHistoryService";
 import { useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import AddCardIcon from '@mui/icons-material/AddCard';
 import SecurityIcon from '@mui/icons-material/Security';
@@ -122,11 +123,11 @@ export default function WalletTopup() {
           });
 
           // Success Feedback
-          alert("Top-up Successful! Balance Updated.");
+          toast.success("Top-up Successful! Balance Updated.");
           navigate("/student/rechargehistory");
         } catch (err) {
           console.error("Recharge saving failed", err);
-          alert("Payment successful but failed to update record. Please contact admin.");
+          toast.error("Payment successful but failed to update record. Please contact admin.");
           navigate("/student/rechargehistory");
         } finally {
           setLoading(false);

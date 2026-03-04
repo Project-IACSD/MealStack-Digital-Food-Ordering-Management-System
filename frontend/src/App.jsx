@@ -1,4 +1,6 @@
 import './App.css';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { CssBaseline, ThemeProvider, Box, CircularProgress } from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
@@ -69,6 +71,7 @@ function App() {
                 <CssBaseline />
                 <DataProvider>
                     <div className="app">
+                        <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick pauseOnHover />
                         {isAuthenticated() && hasRole('ADMIN') && isAdminRoute && <SideBar />}
                         {isAuthenticated() && hasRole('STUDENT') && isStudentRoute && <StudentSideBar />}
 

@@ -17,11 +17,14 @@ import {
   TableHead,
   TableRow,
   Divider,
-  Alert
+  Alert,
+  TextField,
+  InputAdornment
 } from "@mui/material";
 import { tokens } from "../../../theme";
 import ItemDailyService from "../../../services/ItemDailyService";
 import { useNavigate } from "react-router-dom";
+import SearchIcon from '@mui/icons-material/Search';
 import defimg from '../../../assets/pick-meals-image.png';
 // Use dosa image as default for menu items
 import dosaimg from '../../../../public/foodimages/dosa.jpg';
@@ -35,29 +38,26 @@ export default function DailyMenu() {
   const [menuItems, setMenuItems] = useState([]);
   const [cart, setCart] = useState({});
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const current = new Date();
   const dateStr = `${current.getDate()}/${current.getMonth() + 1}/${current.getFullYear()}`;
   const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const dayString = daysOfWeek[current.getDay()];
 
-  console.log("DailyMenu: Rendering...");
+
 
   useEffect(() => {
     const fetchMenu = async () => {
       try {
-        console.log("DailyMenu: Fetching items...");
-        // Check if service exists
         if (!ItemDailyService) {
           throw new Error("ItemDailyService is not defined");
         }
 
         const items = await ItemDailyService.getAllItemsDaily();
-        console.log("DailyMenu: Fetched items:", items);
         if (Array.isArray(items)) {
           setMenuItems(items);
         } else {
-          console.error("DailyMenu: Items is not an array", items);
           setMenuItems([]);
         }
       } catch (error) {
@@ -108,15 +108,38 @@ export default function DailyMenu() {
 
   if (!colors) return <div>Loading Theme...</div>;
 
+  const filteredItems = menuItems.filter(item =>
+    item.itemName?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <Box p={3} sx={{ backgroundColor: theme.palette.mode === "dark" ? colors.primary[500] : "#fcfcfc" }}>
-      <Box textAlign="center" mb={4}>
+      <Box textAlign="center" mb={3}>
         <Typography variant="h2" color={colors.grey[100]} fontWeight="bold">
           Daily Menu
         </Typography>
         <Typography variant="h5" color={colors.greenAccent[500]} sx={{ mt: 1 }}>
           {dayString}, {dateStr}
         </Typography>
+      </Box>
+
+      {/* Search Box */}
+      <Box mb={3} display="flex" justifyContent="center">
+        <TextField
+          variant="outlined"
+          size="small"
+          placeholder="Search menu items..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon sx={{ color: colors.grey[400] }} />
+              </InputAdornment>
+            ),
+          }}
+          sx={{ width: { xs: '100%', sm: '400px' } }}
+        />
       </Box>
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -128,7 +151,7 @@ export default function DailyMenu() {
             Select Your Items
           </Typography>
           <Grid container spacing={3}>
-            {menuItems.map((item) => (
+            {filteredItems.map((item) => (
               <Grid size={{ xs: 12, sm: 6, md: 4 }} key={item.id}>
                 <Card sx={{
                   backgroundColor: colors.primary[400],
@@ -180,9 +203,9 @@ export default function DailyMenu() {
                 </Card>
               </Grid>
             ))}
-            {menuItems.length === 0 && !error && (
+            {filteredItems.length === 0 && !error && (
               <Typography variant="h6" color={colors.grey[300]} sx={{ ml: 2 }}>
-                No items available for today.
+                {searchTerm ? `No items found for "${searchTerm}"` : 'No items available for today.'}
               </Typography>
             )}
           </Grid>

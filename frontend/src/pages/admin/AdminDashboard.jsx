@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import api from '../../api/axios';
+import OrderService from '../../services/OrderService';
 import {
   Container,
   Row,
@@ -22,7 +23,9 @@ import {
   FaSync,
   FaSearch,
   FaSortAlphaDown,
-  FaSortAlphaUp
+  FaSortAlphaUp,
+  FaHourglassHalf,
+  FaChartLine
 } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -33,6 +36,8 @@ function AdminDashboard() {
   const [totalStudents, setTotalStudents] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [pendingOrders, setPendingOrders] = useState([]);
+  const [completedOrders, setCompletedOrders] = useState([]);
 
   // Search & Sort State
   const [searchTerm, setSearchTerm] = useState('');
@@ -53,6 +58,14 @@ function AdminDashboard() {
       // Fetch total student count
       const countResponse = await api.get('/admin/totalstudents');
       setTotalStudents(countResponse.data || 0);
+
+      // Fetch orders
+      const [pending, completed] = await Promise.allSettled([
+        OrderService.getPendingOrders(),
+        OrderService.getCompletedOrders()
+      ]);
+      if (pending.status === 'fulfilled') setPendingOrders(Array.isArray(pending.value) ? pending.value : []);
+      if (completed.status === 'fulfilled') setCompletedOrders(Array.isArray(completed.value) ? completed.value : []);
     } catch (err) {
       setError(err?.response?.data?.message || 'Failed to fetch data');
     } finally {
@@ -63,6 +76,10 @@ function AdminDashboard() {
   // Calculate Metrics
   const totalBalance = students.reduce((sum, s) => sum + (s.balance || 0), 0);
   const activeStudents = students.length;
+  const today = new Date().toDateString();
+  const todaysRevenue = completedOrders
+    .filter(o => new Date(o.time).toDateString() === today)
+    .reduce((sum, o) => sum + (o.amount || 0), 0);
 
   // Filter & Sort Logic
   const filteredStudents = students
@@ -129,7 +146,7 @@ function AdminDashboard() {
       {/* KPI Cards */}
       <Row className="g-3 mb-4">
         {/* Total Students */}
-        <Col md={4}>
+        <Col md={3}>
           <Card className="h-100 bg-admin-card border-admin shadow-sm text-admin-primary">
             <Card.Body className="d-flex align-items-center">
               <div className="rounded-circle p-3 bg-primary bg-opacity-10 me-3">
@@ -144,7 +161,7 @@ function AdminDashboard() {
         </Col>
 
         {/* Active Students */}
-        <Col md={4}>
+        <Col md={3}>
           <Card className="h-100 bg-admin-card border-admin shadow-sm text-admin-primary">
             <Card.Body className="d-flex align-items-center">
               <div className="rounded-circle p-3 bg-info bg-opacity-10 me-3">
@@ -159,7 +176,7 @@ function AdminDashboard() {
         </Col>
 
         {/* Wallet Balance */}
-        <Col md={4}>
+        <Col md={3}>
           <Card className="h-100 bg-admin-card border-admin shadow-sm text-admin-primary">
             <Card.Body className="d-flex align-items-center">
               <div className="rounded-circle p-3 bg-success bg-opacity-10 me-3">
@@ -168,6 +185,22 @@ function AdminDashboard() {
               <div>
                 <h6 className="text-admin-secondary text-uppercase small fw-bold mb-1">Total Wallet Value</h6>
                 <h3 className="mb-0 fw-bold">₹ {totalBalance.toLocaleString()}</h3>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+
+        {/* Pending Orders */}
+        <Col md={3}>
+          <Card className="h-100 bg-admin-card border-admin shadow-sm text-admin-primary" style={{ cursor: 'pointer' }} onClick={() => navigate('/admin/orders/pending')}>
+            <Card.Body className="d-flex align-items-center">
+              <div className="rounded-circle p-3 bg-warning bg-opacity-10 me-3">
+                <FaHourglassHalf size={24} className="text-warning" />
+              </div>
+              <div>
+                <h6 className="text-admin-secondary text-uppercase small fw-bold mb-1">Pending Orders</h6>
+                <h3 className="mb-0 fw-bold">{pendingOrders.length}</h3>
+                <small className="text-admin-secondary">Today's Revenue: ₹{todaysRevenue.toFixed(2)}</small>
               </div>
             </Card.Body>
           </Card>
