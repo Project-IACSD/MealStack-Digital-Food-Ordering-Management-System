@@ -1,0 +1,7 @@
+remote: error: Trace: 926e1c6b08c0909ecd20e3f0b234b70f623fd76afc700206f19b61556801e526        
+remote: error: See https://gh.io/lfs for more information.        
+remote: error: File frontend.zip is 107.44 MB; this exceeds GitHub's file size limit of 100.00 MB        
+remote: error: GH001: Large files detected. You may want to try Git Large File Storage - https://git-lfs.github.com.        
+To https://github.com/Project-IACSD/MealStack-Digital-Food-Ordering-Management-System.git
+ ! [remote rejected] developer -> developer (pre-receive hook declined)
+error: failed to push some refs to 'https://github.com/Project-IACSD/MealStack-Digital-Food-Ordering-Management-System.git'

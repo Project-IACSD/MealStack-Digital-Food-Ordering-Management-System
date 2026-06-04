@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<suite name="MealStack E2E Test Suite" verbose="1" thread-count="1">
+
+    <!-- ══════════════════════════════════════════════════════════
+         USER FLOW TESTS
+         ══════════════════════════════════════════════════════════ -->
+    <test name="User Flow Tests">
+        <classes>
+            <class name="com.mealstack.tests.UserFlowTests"/>
+        </classes>
+    </test>
+
+    <!-- ══════════════════════════════════════════════════════════
+         ADMIN FLOW TESTS
+         ══════════════════════════════════════════════════════════ -->
+    <test name="Admin Flow Tests">
+        <classes>
+            <class name="com.mealstack.tests.AdminFlowTests"/>
+        </classes>
+    </test>
+
+    <!-- ══════════════════════════════════════════════════════════
+         VALIDATION TESTS
+         ══════════════════════════════════════════════════════════ -->
+    <test name="Validation Tests">
+        <classes>
+            <class name="com.mealstack.tests.ValidationTests"/>
+        </classes>
+    </test>
+
+</suite>

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.mealstack</groupId>
+    <artifactId>mealstack-selenium-tests</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>MealStack Selenium E2E Test Suite</name>
+    <description>
+        Complete Selenium WebDriver E2E testing suite for MealStack Digital
+        Food Ordering Management System using Page Object Model (POM) pattern.
+    </description>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Dependency Versions -->
+        <selenium.version>4.18.1</selenium.version>
+        <webdrivermanager.version>5.8.0</webdrivermanager.version>
+        <testng.version>7.9.0</testng.version>
+        <extentreports.version>5.1.1</extentreports.version>
+        <log4j.version>2.23.1</log4j.version>
+        <maven-surefire.version>3.2.5</maven-surefire.version>
+    </properties>
+
+    <dependencies>
+
+        <!-- ===== SELENIUM WEBDRIVER ===== -->
+        <!-- Core Selenium library for browser automation -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>${selenium.version}</version>
+        </dependency>
+
+        <!-- ===== WEBDRIVERMANAGER ===== -->
+        <!--
+            Automatically downloads and manages browser driver binaries.
+            No need to manually download chromedriver.exe, geckodriver.exe etc.
+            Interview Tip: "I used WebDriverManager to eliminate manual driver management,
+            making the framework portable across machines."
+        -->
+        <dependency>
+            <groupId>io.github.bonigarcia</groupId>
+            <artifactId>webdrivermanager</artifactId>
+            <version>${webdrivermanager.version}</version>
+        </dependency>
+
+        <!-- ===== TESTNG FRAMEWORK ===== -->
+        <!--
+            Testing framework providing @Test, @BeforeMethod, @AfterMethod annotations,
+            parallel execution, data providers, and rich XML-based test configuration.
+            Interview Tip: "I chose TestNG over JUnit because of its built-in support
+            for parallel execution via testng.xml and @DataProvider for data-driven testing."
+        -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>${testng.version}</version>
+        </dependency>
+
+        <!-- ===== EXTENT REPORTS ===== -->
+        <!-- Rich HTML test execution reports with screenshots -->
+        <dependency>
+            <groupId>com.aventstack</groupId>
+            <artifactId>extentreports</artifactId>
+            <version>${extentreports.version}</version>
+        </dependency>
+
+        <!-- ===== LOGGING ===== -->
+        <!-- Log4j2 for structured logging throughout the framework -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j2-impl</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+
+        <!-- ===== APACHE COMMONS ===== -->
+        <!-- File I/O utilities for reading config, copying screenshots -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.15.1</version>
+        </dependency>
+
+        <!-- ===== FAKER ===== -->
+        <!-- Generate realistic random test data (names, emails, etc.) -->
+        <dependency>
+            <groupId>com.github.javafaker</groupId>
+            <artifactId>javafaker</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Maven Surefire Plugin: runs TestNG tests during 'mvn test' -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire.version}</version>
+                <configuration>
+                    <!-- Points to testng.xml for suite configuration -->
+                    <suiteXmlFiles>
+                        <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                    </suiteXmlFiles>
+                    <!-- Allows test failures without breaking build (for reporting) -->
+                    <testFailureIgnore>false</testFailureIgnore>
+                </configuration>
+            </plugin>
+
+            <!-- Maven Compiler Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.12.1</version>
+                <configuration>
+                    <source>17</source>
+                    <target>17</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
